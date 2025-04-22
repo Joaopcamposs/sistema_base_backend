@@ -1,0 +1,30 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+-   repo: local
+    hooks:
+    -   id: mypy
+        name: mypy-git-changes
+        entry: bash -c 'ARQUIVOS_ALTERADOS=$(git diff --diff-filter=d --name-only HEAD | grep "^app/.*\.py$" | tr [:space:] " "); if [[ ! -z "$ARQUIVOS_ALTERADOS" && $ARQUIVOS_ALTERADOS = *[!\ ]* ]]; then mypy --follow-imports=skip --ignore-missing-imports $ARQUIVOS_ALTERADOS; else exit 0; fi'
+        language: system
+        types: [ python ]
+        pass_filenames: false
+-   repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v1.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [ commit-msg ]
+        args: [ ] # optional: list of Conventional Commits types to allow
+-   repo: local
+    hooks:
+    -   id: ruff
+        name: ruff
+        entry: bash -c 'ruff format . && ruff . --fix'
+        language: system
