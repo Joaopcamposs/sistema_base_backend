@@ -1,6 +1,22 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_teste import router_teste
+from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_usuario import (
+    router_usuario,
+)
+from infra.banco_de_dados import get_sql_engine, criar_primeiro_usuario
+from libs.ddd.adaptadores.orm.declarativo import Base
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with get_sql_engine().begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    await criar_primeiro_usuario()
+    yield
+
 
 app = FastAPI(
     title="API Sistema Base Backend",
@@ -9,6 +25,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 
@@ -18,3 +35,4 @@ async def root():
 
 
 app.include_router(router_teste)
+app.include_router(router_usuario)

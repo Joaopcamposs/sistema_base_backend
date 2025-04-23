@@ -14,7 +14,7 @@ def bootstrap_base(
     erros_de_eventos_para_subir: list[type[Exception]] | None = None,
     permitir_execucoes_assincronas: bool = True,
 ) -> BarramentoDeMensagens:
-    dependencies = {"uow": uow}
+    dependencies = {"uow": uow, "unidade_de_trabalho": uow}
 
     injected_event_handlers = {
         event_type: [
@@ -49,10 +49,10 @@ def inject_dependencies(handler: callable, dependencies: dict) -> callable:
         async def async_wrapper(message: Comando | Evento) -> Any:
             try:
                 return await handler(message, **deps)
-            except Exception as erro:
-                logger.error(f"Error handling async event {message}. Error: {erro}")
+            # except Exception as erro:
+            #     logger.error(f"Error handling async event {message}. Error: {erro}")
             finally:
-                logger.info(f"Handling async event {message} finished")
+                logger.info(f"Handling async message {message} finished")
 
         return async_wrapper
 
@@ -60,9 +60,9 @@ def inject_dependencies(handler: callable, dependencies: dict) -> callable:
     def sync_wrapper(message: Comando | Evento) -> Any:
         try:
             return handler(message, **deps)
-        except Exception as erro:
-            logger.error(f"Error handling event {message}. Error: {erro}")
+        # except Exception as erro:
+        #     logger.error(f"Error handling event {message}. Error: {erro}")
         finally:
-            logger.info(f"Handling event {message} finished")
+            logger.info(f"Handling message {message} finished")
 
     return sync_wrapper

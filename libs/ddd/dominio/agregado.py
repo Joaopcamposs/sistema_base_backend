@@ -46,6 +46,8 @@ class Agregado(CamposBase):
         return dados_convertidos
 
     def add_event(self, event: "Evento"):  # noqa: F821
-        assert issubclass(type(event), Evento)  # noqa: F821
+        from libs.ddd.barramento import Evento
+
+        assert issubclass(type(event), Evento)
         self.eventos = getattr(self, "eventos", [])
         self.eventos.append(event)

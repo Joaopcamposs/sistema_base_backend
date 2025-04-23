@@ -3,7 +3,14 @@ import os
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine
 
-from libs.utils.constantes import DB_HOST, DB_PASSWORD, DB_USER, DB_NAME
+from libs.utils.constantes import (
+    DB_HOST,
+    DB_PASSWORD,
+    DB_USER,
+    DB_NAME,
+    EMAIL_PRIMEIRO_USUARIO,
+    SENHA_PRIMEIRO_USUARIO,
+)
 
 engine: AsyncEngine | None = None
 
@@ -13,7 +20,7 @@ def obter_uri_do_banco_de_dados(eh_teste: bool = False) -> str:
     em_docker = os.getenv("IN_DOCKER", "false").lower() == "true"
 
     host = DB_HOST
-    port = 5432 if not any([ambiente_de_teste, em_docker]) else 54322
+    port = 5432 if any([ambiente_de_teste, em_docker]) else 54322
     password = DB_PASSWORD
     user = DB_USER
     db_name = DB_NAME
@@ -79,15 +86,48 @@ async def DEFAULT_SQL_SESSION_FACTORY(
     )
     await set_schema_name(session, schema)
 
-    async def _decorator_close(func: callable):
-        """Decorator para fechar a conexão da engine ao fechar a sessão"""
+    # guarda o close original
+    original_close = session.close
 
-        async def _inner(*args, **kwargs):
-            func(*args, **kwargs)
-            await _engine.dispose()
+    # define um novo close que aguarda o original e depois fecha o engine
+    async def close_and_dispose(*args, **kwargs):
+        await original_close(*args, **kwargs)  # **AGUARDA** o close do session
+        await _engine.dispose()  # depois descarta o engine
 
-        return _inner
-
-    session.close = await _decorator_close(session.close)
+    # substitui o método close
+    session.close = close_and_dispose
 
     return session
+
+
+async def criar_primeiro_usuario() -> None:
+    from sqlalchemy import select, insert
+    from contextos_de_negocio.adaptadores.orm.declarativo.usuario import UsuarioDB
+    from uuid import uuid4
+    from contextos_de_negocio.dominio.agregados.usuario import Usuario
+    from libs.utils.tipos_basicos import CPF
+
+    session = await DEFAULT_SQL_SESSION_FACTORY(somente_leitura=False)
+
+    usuarios = (await session.execute(select(UsuarioDB).filter_by())).scalars().all()
+    if not usuarios:
+        senha_criptografada = Usuario.criptografar_senha(SENHA_PRIMEIRO_USUARIO)
+        dados = {
+            "id": uuid4(),
+            "empresa": uuid4(),
+            "nome": "Admin",
+            "email": EMAIL_PRIMEIRO_USUARIO,
+            "cpf": CPF.gerar(),
+            "senha": senha_criptografada,
+            "adm": True,
+            "ativo": True,
+            "permissoes": [],
+            "criado_por": None,
+            "criado_em": None,
+            "modificado_por": None,
+            "ultima_modificacao_em": None,
+            "deletado_por": None,
+            "deletado_em": None,
+        }
+        await session.execute(insert(UsuarioDB).values(dados))
+        await session.commit()

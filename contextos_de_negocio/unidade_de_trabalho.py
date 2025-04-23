@@ -23,15 +23,11 @@ class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata, Generic[REPO_ESCRITA, REPO_LE
         usuario: UsuarioEntidade | None = None,
         schema: str | None = None,
         somente_leitura: bool = False,
-        repo_escrita: type[REPO_ESCRITA] | None = None,
-        repo_leitura: type[REPO_LEITURA] | None = None,
     ):
         self.somente_leitura = somente_leitura
 
         super().__init__(
             usuario=usuario,
-            repo_escrita=repo_escrita,
-            repo_leitura=repo_leitura,
             schema=schema,
         )
 
@@ -39,8 +35,10 @@ class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata, Generic[REPO_ESCRITA, REPO_LE
         self.commited = False
 
         # verificar add schema
-        self.session = self.sql_session_factory(schema=self.schema, somente_leitura=False)
-        self.session_leitura = self.sql_session_factory(
+        self.session = await self.sql_session_factory(
+            schema=self.schema, somente_leitura=False
+        )
+        self.session_leitura = await self.sql_session_factory(
             schema=self.schema,
             somente_leitura=True,
         )

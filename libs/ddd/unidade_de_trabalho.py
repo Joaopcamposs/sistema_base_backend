@@ -43,8 +43,6 @@ class UnidadeDeTrabalhoAbstrata(ABC):
         session_factory=DEFAULT_SQL_SESSION_FACTORY,
         usuario: "UsuarioEntidade" | None = None,  # noqa: F821
         schema: str | None = None,
-        repo_escrita: type[REPO_ESCRITA] = None,
-        repo_leitura: type[REPO_LEITURA] = None,
     ) -> None:
         self.sql_session_factory = session_factory or DEFAULT_SQL_SESSION_FACTORY
         self.usuario = usuario
