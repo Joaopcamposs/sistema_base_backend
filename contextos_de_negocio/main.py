@@ -1,13 +1,6 @@
-import sentry_sdk
 from fastapi import FastAPI
 
-
-sentry_sdk.init(
-    traces_sample_rate=1.0,
-    profiles_sample_rate=1.0,
-    enable_tracing=True,
-)
-
+from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_teste import router_teste
 
 app = FastAPI(
     title="API Sistema Base Backend",
@@ -22,3 +15,6 @@ app = FastAPI(
 @app.get("/")
 async def root():
     return {"message": "API está no ar!"}
+
+
+app.include_router(router_teste)
