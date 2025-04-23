@@ -10,6 +10,7 @@ services:
       - postgres
     environment:
       - IN_DOCKER=true
+      - DB_HOST=postgres
 
   celery_worker:
     build:

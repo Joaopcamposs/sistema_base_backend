@@ -1,6 +1,5 @@
 from __future__ import annotations
 from abc import ABC
-from typing import TypeVar
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,10 +17,6 @@ class UnidadeDeTrabalhoSchemaComProblema(Exception):
 
 class TentandoAbrirUOWContextoJaAberto(Exception):
     pass
-
-
-REPO_LEITURA = TypeVar("REPO_LEITURA")
-REPO_ESCRITA = TypeVar("REPO_ESCRITA")
 
 
 class UnidadeDeTrabalhoAbstrata(ABC):
@@ -100,9 +95,6 @@ class UnidadeDeTrabalhoAbstrata(ABC):
         repos = []
         if hasattr(self, "domain_repo") and self.domain_repo:
             repos.append(self.domain_repo)
-
-        if hasattr(self, "repo_dominio") and self.repo_dominio:
-            repos.extend(self.repo_dominio.values())
 
         for repo in repos:
             for agregado in getattr(repo, "seen", set()):

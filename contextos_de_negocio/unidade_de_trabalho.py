@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generic
+from typing import Generic, TypeVar
 
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
 from libs.ddd.adaptadores.repositorio.repositorio import (
@@ -9,9 +9,10 @@ from libs.ddd.adaptadores.repositorio.repositorio import (
 )
 from libs.ddd.unidade_de_trabalho import (
     UnidadeDeTrabalhoAbstrata,
-    REPO_ESCRITA,
-    REPO_LEITURA,
 )
+
+REPO_LEITURA = TypeVar("REPO_LEITURA")
+REPO_ESCRITA = TypeVar("REPO_ESCRITA")
 
 
 class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata, Generic[REPO_ESCRITA, REPO_LEITURA]):
