@@ -2,6 +2,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_empresa import (
+    router_empresa,
+)
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_seguranca import (
     router_seguranca,
 )
@@ -9,7 +12,10 @@ from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_teste import ro
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_usuario import (
     router_usuario,
 )
-from infra.banco_de_dados import get_sql_engine, criar_primeiro_usuario
+from infra.banco_de_dados import (
+    get_sql_engine,
+    criar_primeira_empresa_e_usuario,
+)
 from libs.ddd.adaptadores.orm.declarativo import Base
 
 
@@ -17,7 +23,7 @@ from libs.ddd.adaptadores.orm.declarativo import Base
 async def lifespan(app: FastAPI):
     async with get_sql_engine().begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    await criar_primeiro_usuario()
+    await criar_primeira_empresa_e_usuario()
     yield
 
 
@@ -39,4 +45,5 @@ async def test():
 
 app.include_router(router_seguranca)
 app.include_router(router_teste)
+app.include_router(router_empresa)
 app.include_router(router_usuario)

@@ -22,7 +22,7 @@ class UsuarioRepoConsulta(RepositorioConsulta):
 
             usuario_entidade = UsuarioEntidade(
                 id=usuario.id,
-                empresa=usuario.empresa,
+                empresa=usuario.empresa_id,
                 nome=usuario.nome,
                 email=usuario.email,
                 cpf=usuario.cpf,
@@ -45,7 +45,7 @@ class UsuarioRepoConsulta(RepositorioConsulta):
 
             usuario_entidade = UsuarioEntidade(
                 id=usuario.id,
-                empresa=usuario.empresa,
+                empresa=usuario.empresa_id,
                 nome=usuario.nome,
                 email=usuario.email,
                 cpf=usuario.cpf,
@@ -71,7 +71,7 @@ class UsuarioRepoConsulta(RepositorioConsulta):
             usuarios_entidade = [
                 UsuarioEntidade(
                     id=usuario.id,
-                    empresa=usuario.empresa,
+                    empresa=usuario.empresa_id,
                     nome=usuario.nome,
                     email=usuario.email,
                     cpf=usuario.cpf,

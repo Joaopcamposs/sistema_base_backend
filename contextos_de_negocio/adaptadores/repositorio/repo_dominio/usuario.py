@@ -86,7 +86,7 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
 
             agregado = Usuario(
                 id=usuario.id,
-                empresa=usuario.empresa,
+                empresa=usuario.empresa_id,
                 nome=usuario.nome,
                 email=usuario.email,
                 cpf=usuario.cpf,
@@ -110,7 +110,7 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
     ) -> None:
         dados = {
             "id": usuario.id,
-            "empresa": usuario.empresa,
+            "empresa_id": usuario.empresa,
             "nome": usuario.nome,
             "email": usuario.email,
             "cpf": usuario.cpf,
@@ -143,9 +143,9 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
     async def _remover(self, usuario: Usuario) -> None:
         if usuario._usa_soft_delete:
             dados = {
-                "modificado_por": usuario.id,
+                "modificado_por": usuario.modificado_por,
                 "ultima_modificacao_em": usuario.ultima_modificacao_em,
-                "deletado_por": usuario.id,
+                "deletado_por": usuario.deletado_por,
                 "deletado_em": usuario.deletado_em,
             }
 

@@ -1,4 +1,5 @@
 import os
+from uuid import UUID
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine
@@ -10,6 +11,7 @@ from libs.utils.constantes import (
     DB_NAME,
     EMAIL_PRIMEIRO_USUARIO,
     SENHA_PRIMEIRO_USUARIO,
+    CPF_PRIMEIRO_USUARIO,
 )
 
 engine: AsyncEngine | None = None
@@ -95,7 +97,7 @@ def DEFAULT_SQL_SESSION_FACTORY(
     return session
 
 
-async def criar_primeiro_usuario() -> None:
+async def criar_primeiro_usuario(id_empresa: UUID) -> None:
     from sqlalchemy import select, insert
     from contextos_de_negocio.adaptadores.orm.declarativo.usuario import UsuarioDB
     from uuid import uuid4
@@ -109,10 +111,10 @@ async def criar_primeiro_usuario() -> None:
             senha_criptografada = Usuario.criptografar_senha(SENHA_PRIMEIRO_USUARIO)
             dados = {
                 "id": uuid4(),
-                "empresa": uuid4(),
+                "empresa_id": id_empresa,
                 "nome": "Admin",
                 "email": EMAIL_PRIMEIRO_USUARIO,
-                "cpf": CPF.gerar(),
+                "cpf": CPF_PRIMEIRO_USUARIO,
                 "senha": senha_criptografada,
                 "adm": True,
                 "ativo": True,
@@ -126,3 +128,44 @@ async def criar_primeiro_usuario() -> None:
             }
             await session.execute(insert(UsuarioDB).values(dados))
             await session.commit()
+
+
+async def criar_primeira_empresa() -> UUID | None:
+    from sqlalchemy import select, insert
+    from uuid import uuid4
+    from contextos_de_negocio.adaptadores.orm.declarativo.empresa import EmpresaDB
+
+    async with DEFAULT_SQL_SESSION_FACTORY(somente_leitura=False) as session:
+        empresas = (await session.execute(select(EmpresaDB).filter_by())).scalars().all()
+
+        if not empresas:
+            id_empresa = uuid4()
+            dados = {
+                "id": id_empresa,
+                "razao_social": "JP ADM",
+                "nome_fantasia": "JP ADM",
+                "nome_responsavel": "João Campos",
+                "email": EMAIL_PRIMEIRO_USUARIO,
+                "cpf": CPF_PRIMEIRO_USUARIO,
+                "cnpj": None,
+                "ativo": True,
+                "criado_por": None,
+                "criado_em": None,
+                "modificado_por": None,
+                "ultima_modificacao_em": None,
+                "deletado_por": None,
+                "deletado_em": None,
+            }
+            await session.execute(insert(EmpresaDB).values(dados))
+            await session.commit()
+
+            return id_empresa
+
+        return None
+
+
+async def criar_primeira_empresa_e_usuario() -> None:
+    id_empresa = await criar_primeira_empresa()
+
+    if id_empresa:
+        await criar_primeiro_usuario(id_empresa)

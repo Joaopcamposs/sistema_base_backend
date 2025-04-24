@@ -14,3 +14,15 @@ class UsuarioNaoEncontrado(FeedbackUsuario):
 class UsuarioJaCadastrado(FeedbackUsuario):
     detail: str = "Email de Usuario já existente"
     status_code: int = status.HTTP_409_CONFLICT
+
+
+@dataclass
+class EmpresaNaoEncontrada(FeedbackUsuario):
+    detail: str = "Empresa não encontrada"
+    status_code: int = status.HTTP_404_NOT_FOUND
+
+
+@dataclass
+class EmpresaJaCadastrada(FeedbackUsuario):
+    detail: str = "Email de Empresa já existente"
+    status_code: int = status.HTTP_409_CONFLICT

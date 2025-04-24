@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from sqlalchemy import UUID, String, Boolean, ARRAY
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import UUID, String, Boolean, ARRAY, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from libs.ddd.adaptadores.orm.declarativo import Base, CamposBaseDB
 
@@ -12,7 +12,7 @@ class UsuarioDB(Base, CamposBaseDB):
     __tablename__ = "usuario"
 
     id: Mapped[UUID] = mapped_column(UUID, primary_key=True, unique=True, default=uuid4)
-    empresa: Mapped[UUID] = mapped_column(UUID, nullable=False)
+    empresa_id: Mapped[UUID] = mapped_column(ForeignKey("empresa.id"), nullable=False)
     nome: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(
         String(255), nullable=False, unique=True, index=True
@@ -23,6 +23,13 @@ class UsuarioDB(Base, CamposBaseDB):
     adm: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     permissoes: Mapped[list[str]] = mapped_column(
         ARRAY(String), nullable=False, default=[]
+    )
+
+    # relacoes
+    empresa = relationship(
+        "EmpresaDB",
+        back_populates="usuarios",
+        foreign_keys=[empresa_id],  # <--- RESOLVE AMBIGUIDADE AQUI
     )
 
     def __repr__(self):
