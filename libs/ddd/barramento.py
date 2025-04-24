@@ -153,8 +153,9 @@ class BarramentoDeMensagens:
         logger.debug(f"handling command {command}")
         try:
             handler = self.command_handlers[type(command)]
-            await handler(command)
+            result = await handler(command)
             self.queue.extend(self.uow.collect_new_events())
+            return result
         except Exception as erro:
             logger.exception(f"Exception handling command {command}")
             raise erro

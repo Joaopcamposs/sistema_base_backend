@@ -85,8 +85,8 @@ class UnidadeDeTrabalhoAbstrata(ABC):
         if not self.commited:
             await self.rollback()
 
-        await self.session.close()
-        await self.session.bind.dispose()
+        if hasattr(self, "session"):
+            await self.session.close()
 
     def adicionar_evento_fora_de_agregado(self, evento: "Evento") -> None:  # noqa: F821
         self.eventos_fora_de_agregado.append(evento)
@@ -110,7 +110,8 @@ class UnidadeDeTrabalhoAbstrata(ABC):
         self.commited = True
 
     async def rollback(self) -> None:
-        await self.session.close()
+        if hasattr(self, "session"):
+            await self.session.close()
 
     @property
     def empresa(self) -> UUID:

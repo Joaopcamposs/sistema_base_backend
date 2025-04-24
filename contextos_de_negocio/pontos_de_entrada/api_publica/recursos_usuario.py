@@ -24,9 +24,9 @@ router_usuario = APIRouter(prefix="/api/v1", tags=["Usuários"])
 async def listar(id: UUID4 | None = None, email: str | None = None):
     from contextos_de_negocio import UsuarioRepoConsulta
 
-    session = await DEFAULT_SQL_SESSION_FACTORY(somente_leitura=True)
-    repo = UsuarioRepoConsulta(session=session)
-    usuario = await repo.consultar_um_por_email(email="joao")
+    async with DEFAULT_SQL_SESSION_FACTORY(somente_leitura=True) as session:
+        repo = UsuarioRepoConsulta(session=session)
+        usuario = await repo.consultar_um_por_email(email="joao")
 
     unidade_de_trabalho = UnidadeDeTrabalho(usuario=usuario)
 
@@ -53,9 +53,9 @@ async def cadastrar(
 ):
     from contextos_de_negocio import UsuarioRepoConsulta
 
-    session = await DEFAULT_SQL_SESSION_FACTORY(somente_leitura=True)
-    repo = UsuarioRepoConsulta(session=session)
-    usuario = await repo.consultar_um_por_email(email="joao")
+    async with DEFAULT_SQL_SESSION_FACTORY(somente_leitura=True) as session:
+        repo = UsuarioRepoConsulta(session=session)
+        usuario = await repo.consultar_um_por_email(email="joao")
 
     bus = bootstrap(usuario=usuario)
 

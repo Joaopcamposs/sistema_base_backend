@@ -36,10 +36,8 @@ class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata, Generic[REPO_ESCRITA, REPO_LE
         self.commited = False
 
         # verificar add schema
-        self.session = await self.sql_session_factory(
-            schema=self.schema, somente_leitura=False
-        )
-        self.session_leitura = await self.sql_session_factory(
+        self.session = self.sql_session_factory(schema=self.schema, somente_leitura=False)
+        self.session_leitura = self.sql_session_factory(
             schema=self.schema,
             somente_leitura=True,
         )

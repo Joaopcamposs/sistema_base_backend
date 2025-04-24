@@ -51,13 +51,14 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
         adm: bool,
         permissoes: list[str],
     ) -> Usuario:
-        usuario_com_mesmo_email = (
-            await self.session.execute(
-                select(UsuarioDB).where(UsuarioDB.email == Email(email))
-            )
-        ).scalar_one_or_none()
-        if usuario_com_mesmo_email:
-            raise UsuarioJaCadastrado
+        async with self.session as session:
+            usuario_com_mesmo_email = (
+                await session.execute(
+                    select(UsuarioDB).where(UsuarioDB.email == Email(email))
+                )
+            ).scalar_one_or_none()
+            if usuario_com_mesmo_email:
+                raise UsuarioJaCadastrado
 
         return Usuario.retornar_agregado_para_cadastro(
             empresa=empresa,
@@ -71,9 +72,9 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
         )
 
     async def consultar_um_por_filtros(self, filtros: Filtros) -> Usuario:
-        async with self:
+        async with self.session as session:
             usuario = (
-                await self.session.execute(select(UsuarioDB).filter_by(**filtros))
+                await session.execute(select(UsuarioDB).filter_by(**filtros))
             ).scalar_one_or_none()
             if not usuario:
                 raise UsuarioNaoEncontrado

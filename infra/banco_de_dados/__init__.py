@@ -67,7 +67,7 @@ def get_sql_engine(
     return engine
 
 
-async def DEFAULT_SQL_SESSION_FACTORY(
+def DEFAULT_SQL_SESSION_FACTORY(
     somente_leitura: bool,
     schema: str = "public",
     isolation_level: str = "READ COMMITTED",
@@ -84,18 +84,13 @@ async def DEFAULT_SQL_SESSION_FACTORY(
         autoflush=True,
         expire_on_commit=False,
     )
-    await set_schema_name(session, schema)
+    # await set_schema_name(session, schema)
 
-    # guarda o close original
-    original_close = session.close
+    async def async_close():
+        await session.close()
 
-    # define um novo close que aguarda o original e depois fecha o engine
-    async def close_and_dispose(*args, **kwargs):
-        await original_close(*args, **kwargs)  # **AGUARDA** o close do session
-        await _engine.dispose()  # depois descarta o engine
-
-    # substitui o método close
-    session.close = close_and_dispose
+    # Anexa o métodu async para ser usado explicitamente
+    session.async_close = async_close  # type: ignore[attr-defined]
 
     return session
 
@@ -107,27 +102,27 @@ async def criar_primeiro_usuario() -> None:
     from contextos_de_negocio.dominio.agregados.usuario import Usuario
     from libs.utils.tipos_basicos import CPF
 
-    session = await DEFAULT_SQL_SESSION_FACTORY(somente_leitura=False)
+    async with DEFAULT_SQL_SESSION_FACTORY(somente_leitura=False) as session:
+        usuarios = (await session.execute(select(UsuarioDB).filter_by())).scalars().all()
 
-    usuarios = (await session.execute(select(UsuarioDB).filter_by())).scalars().all()
-    if not usuarios:
-        senha_criptografada = Usuario.criptografar_senha(SENHA_PRIMEIRO_USUARIO)
-        dados = {
-            "id": uuid4(),
-            "empresa": uuid4(),
-            "nome": "Admin",
-            "email": EMAIL_PRIMEIRO_USUARIO,
-            "cpf": CPF.gerar(),
-            "senha": senha_criptografada,
-            "adm": True,
-            "ativo": True,
-            "permissoes": [],
-            "criado_por": None,
-            "criado_em": None,
-            "modificado_por": None,
-            "ultima_modificacao_em": None,
-            "deletado_por": None,
-            "deletado_em": None,
-        }
-        await session.execute(insert(UsuarioDB).values(dados))
-        await session.commit()
+        if not usuarios:
+            senha_criptografada = Usuario.criptografar_senha(SENHA_PRIMEIRO_USUARIO)
+            dados = {
+                "id": uuid4(),
+                "empresa": uuid4(),
+                "nome": "Admin",
+                "email": EMAIL_PRIMEIRO_USUARIO,
+                "cpf": CPF.gerar(),
+                "senha": senha_criptografada,
+                "adm": True,
+                "ativo": True,
+                "permissoes": [],
+                "criado_por": None,
+                "criado_em": None,
+                "modificado_por": None,
+                "ultima_modificacao_em": None,
+                "deletado_por": None,
+                "deletado_em": None,
+            }
+            await session.execute(insert(UsuarioDB).values(dados))
+            await session.commit()
