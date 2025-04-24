@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from starlette.responses import JSONResponse
 
@@ -19,27 +19,20 @@ from contextos_de_negocio.pontos_de_entrada.schemas.usuario import (
     LerUsuarioSchema,
     AtualizarUsuarioSchema,
 )
+from contextos_de_negocio.servicos.executores.seguranca import (
+    get_current_user,
+    current_user,
+)
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
-from infra.banco_de_dados import DEFAULT_SQL_SESSION_FACTORY
 
-router_usuario = APIRouter(prefix="/api/v1", tags=["Usuários"])
-
-
-async def obter_usuario_padrao_temporariamente() -> None:
-    from contextos_de_negocio import UsuarioRepoConsulta
-
-    async with DEFAULT_SQL_SESSION_FACTORY(somente_leitura=True) as session:
-        repo = UsuarioRepoConsulta(session=session)
-        usuario = await repo.consultar_um_por_email(email="joao")
-
-    return usuario
+router_usuario = APIRouter(
+    prefix="/api/v1", tags=["Usuários"], dependencies=[Depends(get_current_user)]
+)
 
 
 @router_usuario.get("/usuarios", response_model=list[LerUsuarioSchema])
 async def listar(id: UUID4 | None = None, email: str | None = None):
-    usuario = await obter_usuario_padrao_temporariamente()
-
-    unidade_de_trabalho = UnidadeDeTrabalho(usuario=usuario)
+    unidade_de_trabalho = UnidadeDeTrabalho(usuario=current_user.get())
 
     usuarios = await listar_usuarios_por_id_e_email(
         unidade_de_trabalho=unidade_de_trabalho, id=id, email=email
@@ -55,9 +48,7 @@ async def listar(id: UUID4 | None = None, email: str | None = None):
 async def cadastrar(
     novo_usuario: CadastrarUsuarioSchema,
 ):
-    usuario = await obter_usuario_padrao_temporariamente()
-
-    bus = bootstrap(usuario=usuario)
+    bus = bootstrap(usuario=current_user.get())
 
     comando = CadastrarUsuario(**novo_usuario.__dict__)
     retorno = await bus.handle(comando)
@@ -71,9 +62,7 @@ async def atualizar(
     id: UUID4 | None = None,
     email: str | None = None,
 ):
-    usuario = await obter_usuario_padrao_temporariamente()
-
-    bus = bootstrap(usuario=usuario)
+    bus = bootstrap(usuario=current_user.get())
 
     comando = AtualizarUsuario(**usuario_atualizado.__dict__, id=id, email_antigo=email)
     retorno = await bus.handle(comando)
@@ -83,9 +72,7 @@ async def atualizar(
 
 @router_usuario.delete("/usuario")
 async def remover(id: UUID4 | None = None, email: str | None = None):
-    usuario = await obter_usuario_padrao_temporariamente()
-
-    bus = bootstrap(usuario=usuario)
+    bus = bootstrap(usuario=current_user.get())
 
     comando = RemoverUsuario(id=id, email=email)
     retorno = await bus.handle(comando)

@@ -2,6 +2,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_seguranca import (
+    router_seguranca,
+)
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_teste import router_teste
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_usuario import (
     router_usuario,
@@ -30,9 +33,10 @@ app = FastAPI(
 
 
 @app.get("/")
-async def root():
+async def test():
     return {"message": "API está no ar!"}
 
 
+app.include_router(router_seguranca)
 app.include_router(router_teste)
 app.include_router(router_usuario)
