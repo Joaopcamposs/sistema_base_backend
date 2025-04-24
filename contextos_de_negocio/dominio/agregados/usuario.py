@@ -9,7 +9,7 @@ from contextos_de_negocio.dominio.eventos.usuario import (
     UsuarioRemovido,
 )
 from libs.utils.constantes import pwd_context
-from libs.utils.tipos_basicos import Email, TipoDeOperacao, CPF
+from libs.utils.tipos_basicos import Email, TipoDeOperacao
 from libs.ddd.dominio.agregado import Agregado
 
 
@@ -24,6 +24,9 @@ class Usuario(Agregado):
     ativo: bool
     adm: bool
     permissoes: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self._usa_soft_delete = True
 
     def __hash__(self) -> int:
         return hash(self.id)
@@ -76,8 +79,8 @@ class Usuario(Agregado):
 
         self.nome = nome
         self.email = Email(email)
-        self.cpf = CPF(cpf)
-        self.senha = senha
+        self.cpf = cpf  # todo desativado temporariamente
+        self.senha = self.criptografar_senha(senha)
         self.ativo = ativo
         self.adm = adm
         self.permissoes = permissoes

@@ -11,6 +11,7 @@ from contextos_de_negocio.dominio.excecoes import (
 )
 from libs.ddd.adaptadores.repositorio.repositorio import RepositorioDominio
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
+from libs.utils.constantes import NAO_DELETADO
 from libs.utils.tipos_basicos import Email, TipoDeOperacao
 
 
@@ -54,7 +55,9 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
         async with self.session as session:
             usuario_com_mesmo_email = (
                 await session.execute(
-                    select(UsuarioDB).where(UsuarioDB.email == Email(email))
+                    select(UsuarioDB).where(
+                        UsuarioDB.email == Email(email), UsuarioDB.deletado_em.is_(None)
+                    )
                 )
             ).scalar_one_or_none()
             if usuario_com_mesmo_email:
@@ -74,7 +77,9 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
     async def consultar_um_por_filtros(self, filtros: Filtros) -> Usuario:
         async with self.session as session:
             usuario = (
-                await session.execute(select(UsuarioDB).filter_by(**filtros))
+                await session.execute(
+                    select(UsuarioDB).filter_by(**filtros, **NAO_DELETADO)
+                )
             ).scalar_one_or_none()
             if not usuario:
                 raise UsuarioNaoEncontrado
@@ -136,6 +141,16 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
         await self.session.execute(operacao)
 
     async def _remover(self, usuario: Usuario) -> None:
-        operacao = delete(UsuarioDB).where(UsuarioDB.id == usuario.id)
+        if usuario._usa_soft_delete:
+            dados = {
+                "modificado_por": usuario.id,
+                "ultima_modificacao_em": usuario.ultima_modificacao_em,
+                "deletado_por": usuario.id,
+                "deletado_em": usuario.deletado_em,
+            }
+
+            operacao = update(UsuarioDB).where(UsuarioDB.id == usuario.id).values(dados)
+        else:
+            operacao = delete(UsuarioDB).where(UsuarioDB.id == usuario.id)
 
         await self.session.execute(operacao)

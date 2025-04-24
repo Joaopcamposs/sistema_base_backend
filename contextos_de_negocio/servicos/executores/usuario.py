@@ -45,12 +45,12 @@ async def atualizar_usuario(
     from contextos_de_negocio import Dominio, UsuarioRepoDominio
 
     async with unidade_de_trabalho(Dominio.usuario) as uow:
-        repo_dominio: UsuarioRepoDominio = uow.repo_escrita
+        repo_dominio: UsuarioRepoDominio = uow.domain_repo
 
         filtros = Filtros(
             {
                 "id": comando.id,
-                "email": comando.email,
+                "email": comando.email_antigo,
             }
         )
         usuario = await repo_dominio.consultar_um_por_filtros(filtros=filtros)
@@ -79,7 +79,7 @@ async def remover_usuario(
     from contextos_de_negocio import Dominio, UsuarioRepoDominio
 
     async with unidade_de_trabalho(Dominio.usuario) as uow:
-        repo_dominio: UsuarioRepoDominio = uow.repo_escrita
+        repo_dominio: UsuarioRepoDominio = uow.domain_repo
 
         filtros = Filtros(
             {

@@ -20,6 +20,7 @@ class CamposBase(ABC):
 class Agregado(CamposBase):
     eventos: list["Evento"] = field(default_factory=list)  # noqa: F821
     _tipo_de_operacao: TipoDeOperacao | None = None
+    _usa_soft_delete: bool = True
 
     def to_dict(self) -> dict:
         dados = {

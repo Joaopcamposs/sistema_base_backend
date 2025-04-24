@@ -16,10 +16,10 @@ class CadastrarUsuarioSchema(BaseModel):
 class AtualizarUsuarioSchema(BaseModel):
     nome: str
     email: str
+    cpf: str
     senha: str
     adm: bool
     ativo: bool
-    _id: UUID4 | None = None
 
 
 class LerUsuarioSchema(BaseModel):

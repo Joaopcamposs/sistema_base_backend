@@ -20,7 +20,6 @@ class CadastrarUsuario(Comando):
 
 @dataclass
 class AtualizarUsuario(Comando):
-    id: UUID
     nome: str
     email: str
     cpf: str
@@ -28,6 +27,9 @@ class AtualizarUsuario(Comando):
     ativo: bool
     adm: bool
     permissoes: list[str] = field(default_factory=list)
+    # campos de busca
+    id: UUID | None = None
+    email_antigo: str | None = None
 
 
 @dataclass

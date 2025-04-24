@@ -1,3 +1,5 @@
+from typing import Final
+
 from dotenv import load_dotenv
 import os
 
@@ -15,3 +17,5 @@ SENHA_PRIMEIRO_USUARIO = os.getenv("SENHA_PRIMEIRO_USUARIO")
 CPF_PRIMEIRO_USUARIO = os.getenv("CPF_PRIMEIRO_USUARIO")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+NAO_DELETADO: Final[dict] = {"deletado_em": None}
