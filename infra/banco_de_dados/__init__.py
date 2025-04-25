@@ -2,7 +2,7 @@ import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from sqlalchemy import text
+from sqlalchemy import text, NullPool
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     AsyncEngine,
@@ -66,6 +66,7 @@ def get_sql_engine(
                 obter_uri_do_banco_de_dados(),
                 isolation_level=isolation_level,
                 future=True,
+                poolclass=NullPool,
             )
             return engine_replica
 
@@ -187,12 +188,11 @@ async def criar_schema_e_tabelas(schema_id: str):
 
         # 3) criar tabelas no novo schema
         async with engine_temp.begin() as conn:
-            for table in Base.metadata.sorted_tables:
-                await conn.run_sync(table.create)
+            await conn.run_sync(Base.metadata.create_all)
 
         # 4) restaurar esquema padrão (public)
         for table in Base.metadata.sorted_tables:
-            if table.schema != "public":
+            if table.schema == schema_id:
                 table.schema = None
     finally:
         await engine_temp.dispose()
