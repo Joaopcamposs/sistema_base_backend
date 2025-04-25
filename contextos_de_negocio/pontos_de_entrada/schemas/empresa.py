@@ -11,6 +11,7 @@ class CadastrarEmpresaSchema(BaseModel):
     cpf: str | None = None
     cnpj: str | None = None
     ativo: bool
+    chave_secreta: str | None = None
 
 
 class AtualizarEmpresaSchema(BaseModel):

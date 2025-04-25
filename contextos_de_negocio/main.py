@@ -12,17 +12,11 @@ from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_teste import ro
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_usuario import (
     router_usuario,
 )
-from infra.banco_de_dados import (
-    get_sql_engine,
-    criar_primeira_empresa_e_usuario,
-)
-from libs.ddd.adaptadores.orm.declarativo import Base
+from infra.banco_de_dados.inicializadores import criar_primeira_empresa_e_usuario
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with get_sql_engine().begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     await criar_primeira_empresa_e_usuario()
     yield
 

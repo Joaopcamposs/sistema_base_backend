@@ -24,22 +24,25 @@ class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata, Generic[REPO_ESCRITA, REPO_LE
         usuario: UsuarioEntidade | None = None,
         schema: str | None = None,
         somente_leitura: bool = False,
+        eh_criacao_de_nova_empresa: bool = False,
     ):
         self.somente_leitura = somente_leitura
 
         super().__init__(
             usuario=usuario,
             schema=schema,
+            eh_criacao_de_nova_empresa=eh_criacao_de_nova_empresa,
         )
 
     async def __aenter__(self) -> UnidadeDeTrabalho:
         self.commited = False
 
         # verificar add schema
-        self.session = self.sql_session_factory(schema=self.schema, somente_leitura=False)
-        self.session_leitura = self.sql_session_factory(
-            schema=self.schema,
-            somente_leitura=True,
+        self.session = await self.sql_session_factory(
+            somente_leitura=False, schema=self.schema
+        )
+        self.session_leitura = await self.sql_session_factory(
+            somente_leitura=True, schema=self.schema
         )
 
         if not self.somente_leitura and self.domain_repo_class:

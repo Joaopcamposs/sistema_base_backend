@@ -22,11 +22,14 @@ async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
     user = await authenticate_user(form_data.username, form_data.password)
-    if not user:
+    if user is None:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email, "scopes": form_data.scopes},
+        data={
+            "email": user.descriptografar_email(user.email_criptografado),
+            "empresa_id": str(user.empresa),
+        },
         expires_delta=access_token_expires,
     )
     return Token(access_token=access_token, token_type="bearer")

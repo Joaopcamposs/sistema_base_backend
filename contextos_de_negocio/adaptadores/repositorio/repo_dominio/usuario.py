@@ -4,6 +4,9 @@ from uuid import UUID
 from sqlalchemy import select, insert, update, delete
 
 from contextos_de_negocio.adaptadores.orm.declarativo.usuario import UsuarioDB
+from contextos_de_negocio.adaptadores.repositorio.repo_mixins.usuario_publico import (
+    UsuarioPublicoMixin,
+)
 from contextos_de_negocio.dominio.agregados.usuario import Usuario
 from contextos_de_negocio.dominio.excecoes import (
     UsuarioNaoEncontrado,
@@ -40,7 +43,7 @@ class UsuarioRepoDominioAbstrato(RepositorioDominio):
         raise NotImplementedError()
 
 
-class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
+class UsuarioRepoDominio(UsuarioRepoDominioAbstrato, UsuarioPublicoMixin):
     async def gerar_agregado_para_cadastro(
         self,
         empresa: UUID,
@@ -92,7 +95,7 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
                 cpf=usuario.cpf,
                 adm=usuario.adm,
                 ativo=usuario.ativo,
-                senha=usuario.senha,
+                senha_hash=usuario.senha,
                 permissoes=usuario.permissoes,
                 criado_por=usuario.criado_por,
                 criado_em=usuario.criado_em,
@@ -114,7 +117,7 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato):
             "nome": usuario.nome,
             "email": usuario.email,
             "cpf": usuario.cpf,
-            "senha": usuario.senha,
+            "senha": usuario.senha_hash,
             "adm": usuario.adm,
             "ativo": usuario.ativo,
             "permissoes": usuario.permissoes,

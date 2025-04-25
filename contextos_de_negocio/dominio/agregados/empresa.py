@@ -16,13 +16,13 @@ from libs.ddd.dominio.agregado import Agregado
 @dataclass(kw_only=True)
 class Empresa(Agregado):
     id: UUID
-    razao_social: str | None = None
-    nome_fantasia: str
+    razao_social: str
     nome_responsavel: str
     email: str
-    cpf: str | None = None
-    cnpj: str | None = None
     ativo: bool
+    cpf: str
+    nome_fantasia: str | None = None
+    cnpj: str | None = None
 
     def __post_init__(self) -> None:
         self._usa_soft_delete = True
@@ -34,12 +34,13 @@ class Empresa(Agregado):
     def retornar_agregado_para_cadastro(
         cls,
         razao_social: str,
-        nome_fantasia: str,
+        nome_fantasia: str | None,
         nome_responsavel: str,
         email: str,
         cpf: str,
-        cnpj: str,
+        cnpj: str | None,
         ativo: bool,
+        id: UUID | None = None,
     ) -> "Empresa":
         email = Email(email)
         return Empresa(
@@ -50,12 +51,12 @@ class Empresa(Agregado):
             cpf=cpf,
             cnpj=cnpj,
             ativo=ativo,
-            id=uuid4(),
+            id=id or uuid4(),
             _tipo_de_operacao=TipoDeOperacao.INSERCAO,
         )
 
     def cadastrar(self, usuario: UsuarioEntidade) -> None:
-        self.criado_por = usuario.id
+        self.criado_por = None  # nao registraremos o usuario que criou
         self.criado_em = datetime.now()
 
         self.add_event(EmpresaCriada(id=self.id))
@@ -63,11 +64,11 @@ class Empresa(Agregado):
     def atualizar(
         self,
         razao_social: str,
-        nome_fantasia: str,
+        nome_fantasia: str | None,
         nome_responsavel: str,
         email: str,
         cpf: str,
-        cnpj: str,
+        cnpj: str | None,
         ativo: bool,
         usuario: UsuarioEntidade,
     ) -> None:
@@ -81,7 +82,7 @@ class Empresa(Agregado):
         self.cnpj = cnpj
         self.ativo = ativo
 
-        self.modificado_por = usuario.id
+        self.modificado_por = None  # nao registraremos o usuario que modificou
         self.ultima_modificacao_em = datetime.now()
 
         self.add_event(EmpresaAtualizada(id=self.id))

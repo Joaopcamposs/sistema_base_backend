@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from sqlalchemy import UUID, String, Boolean, ARRAY, ForeignKey
+from sqlalchemy import UUID, String, Boolean, ARRAY, ForeignKey, Index, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from libs.ddd.adaptadores.orm.declarativo import Base, CamposBaseDB
@@ -37,3 +37,20 @@ class UsuarioDB(Base, CamposBaseDB):
 
     def __hash__(self):
         return hash(self.id)
+
+
+class UsuarioPublicoDB(Base, CamposBaseDB):
+    __tablename__ = "usuario_publico"
+    __table_args__ = (
+        Index("idx_usuario_email_hash_empresa", "email_hash", "empresa_id"),
+        {"schema": "public"},
+    )
+
+    id: Mapped[UUID] = mapped_column(UUID, primary_key=True, unique=True, default=uuid4)
+    empresa_id: Mapped[UUID] = mapped_column(UUID, nullable=False)
+    ativo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    email_criptografado: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    email_hash: Mapped[str] = mapped_column(
+        String(64), nullable=False, unique=True, index=True
+    )
+    senha_hash: Mapped[str] = mapped_column(String(128), nullable=False)

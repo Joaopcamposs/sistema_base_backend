@@ -3,12 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from libs.ddd.dominio.agregado import CamposBase
-from libs.utils.constantes import pwd_context
+from libs.ddd.dominio.agregado import CamposBase, SegurancaDoUsuario
 
 
 @dataclass(kw_only=True)
-class UsuarioEntidade(CamposBase):
+class UsuarioEntidade(CamposBase, SegurancaDoUsuario):
     id: UUID
     empresa: UUID
     nome: str
@@ -18,8 +17,14 @@ class UsuarioEntidade(CamposBase):
     adm: bool
     permissoes: list[str] = field(default_factory=list)
 
-    _senha: str
+    _senha_hash: str
 
-    def verificar_senha(self, senha: str) -> bool:
-        senhas_conferem = pwd_context.verify(secret=senha, hash=self._senha)
-        return senhas_conferem
+
+@dataclass(kw_only=True)
+class UsuarioPublicoEntidade(CamposBase, SegurancaDoUsuario):
+    id: UUID
+    empresa: UUID
+    ativo: bool
+    email_criptografado: bytes
+    email_hash: str
+    _senha_hash: str

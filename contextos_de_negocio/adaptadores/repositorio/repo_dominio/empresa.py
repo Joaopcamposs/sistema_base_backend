@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from uuid import UUID
 
 from sqlalchemy import select, insert, update, delete
 
@@ -49,6 +50,7 @@ class EmpresaRepoDominio(EmpresaRepoDominioAbstrato):
         cpf: str,
         cnpj: str,
         ativo: bool,
+        id: UUID | None = None,
     ) -> Empresa:
         async with self.session as session:
             empresa_com_mesmo_email = (
@@ -69,6 +71,7 @@ class EmpresaRepoDominio(EmpresaRepoDominioAbstrato):
             cpf=cpf,
             cnpj=cnpj,
             ativo=ativo,
+            id=id,
         )
 
     async def consultar_um_por_filtros(self, filtros: Filtros) -> Empresa:

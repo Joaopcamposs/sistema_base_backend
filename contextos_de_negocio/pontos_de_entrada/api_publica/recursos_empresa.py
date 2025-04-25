@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
@@ -22,6 +23,9 @@ from contextos_de_negocio.servicos.executores.seguranca import (
     current_user,
 )
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
+from infra.banco_de_dados import excluir_schema, criar_schema_e_tabelas
+from libs.ddd.barramento import logger
+from libs.utils.constantes import CHAVE_SECRETA
 
 router_empresa = APIRouter(
     prefix="/api/v1", tags=["Empresas"], dependencies=[Depends(get_current_user)]
@@ -46,32 +50,61 @@ async def listar(id: UUID4 | None = None):
 async def cadastrar(
     novo_empresa: CadastrarEmpresaSchema,
 ):
-    bus = bootstrap(usuario=current_user.get())
+    if novo_empresa.chave_secreta != CHAVE_SECRETA:
+        raise ValueError("Chave secreta inválida")
 
-    comando = CadastrarEmpresa(**novo_empresa.__dict__)
-    retorno = await bus.handle(comando)
+    id_empresa = uuid4()
 
-    return JSONResponse(status_code=HTTPStatus.CREATED, content=str(retorno))
+    try:
+        await criar_schema_e_tabelas(str(id_empresa))
+
+        bus = bootstrap(
+            usuario=current_user.get(),
+            schema=str(id_empresa),
+            eh_criacao_de_nova_empresa=True,
+        )
+
+        comando = CadastrarEmpresa(
+            razao_social=novo_empresa.razao_social,
+            nome_responsavel=novo_empresa.nome_responsavel,
+            ativo=novo_empresa.ativo,
+            cpf=novo_empresa.cpf,
+            email=novo_empresa.email,
+            cnpj=novo_empresa.cnpj,
+            nome_fantasia=novo_empresa.nome_fantasia,
+            id=id_empresa,
+        )
+        retorno = await bus.handle(comando)
+
+        return JSONResponse(status_code=HTTPStatus.CREATED, content=str(retorno))
+    except Exception as erro:
+        await excluir_schema(str(id_empresa))
+        logger.error(f"Erro ao criar empresa. O schema {id_empresa} foi dropado", erro)
+        raise erro
 
 
 @router_empresa.put("/empresa", response_model=LerEmpresaSchema)
 async def atualizar(
     empresa_atualizado: AtualizarEmpresaSchema,
     id: UUID4 | None = None,
+    email: str | None = None,
 ):
     bus = bootstrap(usuario=current_user.get())
 
-    comando = AtualizarEmpresa(**empresa_atualizado.__dict__, id=id)
+    comando = AtualizarEmpresa(**empresa_atualizado.__dict__, id=id, email_antigo=email)
     retorno = await bus.handle(comando)
 
     return JSONResponse(status_code=HTTPStatus.OK, content=str(retorno))
 
 
 @router_empresa.delete("/empresa")
-async def remover(id: UUID4 | None = None):
+async def remover(
+    id: UUID4 | None = None,
+    email: str | None = None,
+):
     bus = bootstrap(usuario=current_user.get())
 
-    comando = RemoverEmpresa(id=id)
+    comando = RemoverEmpresa(id=id, email=email)
     retorno = await bus.handle(comando)
 
     return JSONResponse(status_code=HTTPStatus.OK, content=str(retorno))

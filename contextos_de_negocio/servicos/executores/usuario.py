@@ -1,10 +1,12 @@
 from uuid import UUID
 
+from contextos_de_negocio.dominio.agregados.usuario import UsuarioPublico
 from contextos_de_negocio.dominio.comandos.usuario import (
     CadastrarUsuario,
     AtualizarUsuario,
     RemoverUsuario,
 )
+from contextos_de_negocio.dominio.eventos.usuario import UsuarioCriado
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
 
@@ -96,3 +98,28 @@ async def remover_usuario(
         await uow.commit()
 
     return usuario.id
+
+
+async def cadastrar_usuario_publico(
+    evento: UsuarioCriado, unidade_de_trabalho: UnidadeDeTrabalho
+) -> UUID:
+    from contextos_de_negocio import Dominio, UsuarioRepoDominio
+
+    async with unidade_de_trabalho(Dominio.usuario) as uow:
+        repo_dominio: UsuarioRepoDominio = uow.domain_repo
+
+        filtros = Filtros(
+            {
+                "id": evento.id,
+            }
+        )
+        usuario = await repo_dominio.consultar_um_por_filtros(filtros=filtros)
+
+        usuario_publico = UsuarioPublico.retornar_agregado_para_cadastro(usuario=usuario)
+
+        await repo_dominio.adicionar_usuario_publico(
+            usuario=usuario_publico,
+        )
+        await uow.commit()
+
+    return usuario_publico.id

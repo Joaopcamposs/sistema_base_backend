@@ -34,13 +34,14 @@ from contextos_de_negocio.servicos.executores.usuario import (
     remover_usuario,
     atualizar_usuario,
     cadastrar_usuario,
+    cadastrar_usuario_publico,
 )
 from libs.ddd.barramento import Evento, Comando
 
 EVENT_HANDLERS: dict[type[Evento], list[callable]] = {
     EventoTeste: [evento_teste],
     EventoTesteAssincrono: [evento_teste_assincrono],
-    UsuarioCriado: [],
+    UsuarioCriado: [cadastrar_usuario_publico],
     UsuarioAtualizado: [],
     UsuarioRemovido: [],
     EmpresaCriada: [],

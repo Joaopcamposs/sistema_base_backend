@@ -38,11 +38,21 @@ class UnidadeDeTrabalhoAbstrata(ABC):
         session_factory=DEFAULT_SQL_SESSION_FACTORY,
         usuario: "UsuarioEntidade" | None = None,  # noqa: F821
         schema: str | None = None,
+        eh_criacao_de_nova_empresa: bool = False,
     ) -> None:
         self.sql_session_factory = session_factory or DEFAULT_SQL_SESSION_FACTORY
         self.usuario = usuario
 
-        if schema and usuario and str(usuario.empresa) != str(schema):
+        if (
+            all(
+                [
+                    schema,
+                    usuario,
+                    str(usuario.empresa) != str(schema),
+                ]
+            )
+            and not eh_criacao_de_nova_empresa
+        ):
             raise UnidadeDeTrabalhoSchemaComProblema(
                 "O usuário não pertence a esse schema."
             )

@@ -1,17 +1,21 @@
 import os
-from uuid import UUID
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    AsyncEngine,
+    create_async_engine,
+    AsyncConnection,
+)
 
+from libs.ddd.adaptadores.orm.declarativo import Base
 from libs.utils.constantes import (
     DB_HOST,
     DB_PASSWORD,
     DB_USER,
     DB_NAME,
-    EMAIL_PRIMEIRO_USUARIO,
-    SENHA_PRIMEIRO_USUARIO,
-    CPF_PRIMEIRO_USUARIO,
 )
 
 engine: AsyncEngine | None = None
@@ -41,12 +45,8 @@ def obter_uri_do_celery() -> str:
     return celery_uri
 
 
-async def set_schema_name(
-    session: AsyncSession, schema: str, force_search_path: bool = False
-):
-    if force_search_path:
-        await session.execute(text(f'SET search_path TO "{schema}"'))
-
+async def set_schema_name(session: AsyncSession, schema: str):
+    await session.execute(text(f'SET search_path TO "{schema}"'))
     setattr(session, "schema", str(schema))
 
 
@@ -56,27 +56,45 @@ def get_schema_name(session: AsyncSession):
 
 def get_sql_engine(
     isolation_level: str = "READ COMMITTED",
+    force_create_engine: bool = False,
 ) -> AsyncEngine:
-    global engine
+    def _criar_engine_correta():
+        global engine
 
-    if not engine:
-        engine = create_async_engine(
-            obter_uri_do_banco_de_dados(),
-            isolation_level=isolation_level,
-            future=True,
-        )
+        if force_create_engine:
+            engine_replica = create_async_engine(
+                obter_uri_do_banco_de_dados(),
+                isolation_level=isolation_level,
+                future=True,
+            )
+            return engine_replica
 
-    return engine
+        if not engine:
+            engine = create_async_engine(
+                obter_uri_do_banco_de_dados(),
+                isolation_level=isolation_level,
+                future=True,
+            )
+        return engine
+
+    engine_correta = _criar_engine_correta()
+
+    return engine_correta
 
 
-def DEFAULT_SQL_SESSION_FACTORY(
+async def DEFAULT_SQL_SESSION_FACTORY(
     somente_leitura: bool,
-    schema: str = "public",
+    schema: str | None = None,
     isolation_level: str = "READ COMMITTED",
 ) -> AsyncSession:
+    """
+    Cria uma sessão SQLAlchemy, somente leitura ou não, com o esquema especificado.
+    Deve ser utilizada internamente em estruturas que lidam com contextos, como a UnidadeDeTrabalho.
+    """
     _engine = get_sql_engine(isolation_level=isolation_level)
 
-    execution_options = dict(schema_translate_map={None: "public"})
+    schema_atual = schema or "public"
+    execution_options = dict(schema_translate_map={None: schema_atual})
 
     if somente_leitura:
         execution_options["isolation_level"] = "AUTOCOMMIT"
@@ -86,7 +104,7 @@ def DEFAULT_SQL_SESSION_FACTORY(
         autoflush=True,
         expire_on_commit=False,
     )
-    # await set_schema_name(session, schema)
+    await set_schema_name(session, schema_atual)
 
     async def async_close():
         await session.close()
@@ -97,75 +115,83 @@ def DEFAULT_SQL_SESSION_FACTORY(
     return session
 
 
-async def criar_primeiro_usuario(id_empresa: UUID) -> None:
-    from sqlalchemy import select, insert
-    from contextos_de_negocio.adaptadores.orm.declarativo.usuario import UsuarioDB
-    from uuid import uuid4
-    from contextos_de_negocio.dominio.agregados.usuario import Usuario
-    from libs.utils.tipos_basicos import CPF
-
-    async with DEFAULT_SQL_SESSION_FACTORY(somente_leitura=False) as session:
-        usuarios = (await session.execute(select(UsuarioDB).filter_by())).scalars().all()
-
-        if not usuarios:
-            senha_criptografada = Usuario.criptografar_senha(SENHA_PRIMEIRO_USUARIO)
-            dados = {
-                "id": uuid4(),
-                "empresa_id": id_empresa,
-                "nome": "Admin",
-                "email": EMAIL_PRIMEIRO_USUARIO,
-                "cpf": CPF_PRIMEIRO_USUARIO,
-                "senha": senha_criptografada,
-                "adm": True,
-                "ativo": True,
-                "permissoes": [],
-                "criado_por": None,
-                "criado_em": None,
-                "modificado_por": None,
-                "ultima_modificacao_em": None,
-                "deletado_por": None,
-                "deletado_em": None,
-            }
-            await session.execute(insert(UsuarioDB).values(dados))
-            await session.commit()
+@asynccontextmanager
+async def get_session(
+    somente_leitura: bool, schema: str = "public"
+) -> AsyncGenerator[AsyncSession, None]:
+    """
+    Gerenciador de contexto para facilitar o uso da funcao que cria a sessao.
+    Deve ser usada em contexto abertos diretamente, sem uso da unidade de trabalho.
+    Não deve ser usada para substituir a função principal dentro da unidade de trabalho.
+    """
+    session = await DEFAULT_SQL_SESSION_FACTORY(
+        somente_leitura=somente_leitura, schema=schema
+    )
+    try:
+        yield session
+    finally:
+        await session.close()
 
 
-async def criar_primeira_empresa() -> UUID | None:
-    from sqlalchemy import select, insert
-    from uuid import uuid4
-    from contextos_de_negocio.adaptadores.orm.declarativo.empresa import EmpresaDB
-
-    async with DEFAULT_SQL_SESSION_FACTORY(somente_leitura=False) as session:
-        empresas = (await session.execute(select(EmpresaDB).filter_by())).scalars().all()
-
-        if not empresas:
-            id_empresa = uuid4()
-            dados = {
-                "id": id_empresa,
-                "razao_social": "JP ADM",
-                "nome_fantasia": "JP ADM",
-                "nome_responsavel": "João Campos",
-                "email": EMAIL_PRIMEIRO_USUARIO,
-                "cpf": CPF_PRIMEIRO_USUARIO,
-                "cnpj": None,
-                "ativo": True,
-                "criado_por": None,
-                "criado_em": None,
-                "modificado_por": None,
-                "ultima_modificacao_em": None,
-                "deletado_por": None,
-                "deletado_em": None,
-            }
-            await session.execute(insert(EmpresaDB).values(dados))
-            await session.commit()
-
-            return id_empresa
-
-        return None
+SCHEMAS_PARA_NAO_LISTAR: tuple[str, ...] = (
+    "public",
+    "information_schema",
+    "pg_catalog",
+    "pg_toast",
+)
 
 
-async def criar_primeira_empresa_e_usuario() -> None:
-    id_empresa = await criar_primeira_empresa()
+async def listar_schemas_existentes() -> list[str]:
+    async with get_sql_engine().begin() as conn:
+        result = await conn.execute(
+            text("SELECT schema_name FROM information_schema.schemata")
+        )
+        return [row[0] for row in result if row[0] not in SCHEMAS_PARA_NAO_LISTAR]
 
-    if id_empresa:
-        await criar_primeiro_usuario(id_empresa)
+
+async def verificar_schema_existente(conn: AsyncConnection, schema_id: str) -> None:
+    result = await conn.execute(
+        text(
+            f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{schema_id}'"
+        )
+    )
+    if result.fetchone():
+        raise ValueError(f"Schema {schema_id} já existe")
+
+
+async def excluir_schema(schema_id: str) -> None:
+    async with get_sql_engine().begin() as conn:
+        await conn.execute(text(f'DROP SCHEMA "{schema_id}" CASCADE;'))
+
+
+async def criar_schema_e_tabelas(schema_id: str):
+    """
+    1. Cria o schema no Postgres
+    2. Ajusta os metadados para usar schema_id
+    3. Cria as tabelas do tenant dentro dele
+    4. Restaura schema=None nos metadados
+    """
+    # criar engine temporária
+    engine_temp: AsyncEngine = get_sql_engine(force_create_engine=True)
+
+    # 1) criar schema
+    async with engine_temp.begin() as conn:
+        await verificar_schema_existente(conn, schema_id)
+        await conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema_id}"'))
+
+    # 2) atribuir schema nos objetos
+    for table in Base.metadata.sorted_tables:
+        if table.schema != "public":
+            table.schema = schema_id
+
+    # 3) criar tabelas no novo schema
+    async with engine_temp.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    # fechar a engine temporária
+    await engine_temp.dispose()
+
+    # 4) restaurar esquema padrão (public)
+    for table in Base.metadata.sorted_tables:
+        if table.schema != "public":
+            table.schema = None

@@ -1,3 +1,4 @@
+import base64
 from typing import Final
 
 from dotenv import load_dotenv
@@ -16,6 +17,8 @@ DB_NAME = os.getenv("DB_NAME", "postgres")
 EMAIL_PRIMEIRO_USUARIO = os.getenv("EMAIL_PRIMEIRO_USUARIO")
 SENHA_PRIMEIRO_USUARIO = os.getenv("SENHA_PRIMEIRO_USUARIO")
 CPF_PRIMEIRO_USUARIO = os.getenv("CPF_PRIMEIRO_USUARIO")
+AES_KEY = base64.b64decode(os.getenv("AES_KEY").encode())
+CHAVE_SECRETA = os.getenv("CHAVE_SECRETA")
 
 NAO_DELETADO: Final[dict] = {"deletado_em": None}
 

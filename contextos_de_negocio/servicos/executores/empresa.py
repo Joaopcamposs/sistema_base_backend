@@ -7,6 +7,7 @@ from contextos_de_negocio.dominio.comandos.empresa import (
 )
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
+from libs.utils.tipos_basicos import Email
 
 
 async def cadastrar_empresa(
@@ -25,6 +26,7 @@ async def cadastrar_empresa(
             cpf=comando.cpf,
             cnpj=comando.cnpj,
             ativo=comando.ativo,
+            id=comando.id,
         )
         nova_empresa.cadastrar(
             usuario=uow.usuario,
@@ -49,6 +51,7 @@ async def atualizar_empresa(
         filtros = Filtros(
             {
                 "id": comando.id,
+                "email": Email(comando.email_antigo) if comando.email_antigo else None,
             }
         )
         empresa = await repo_dominio.consultar_um_por_filtros(filtros=filtros)
@@ -82,6 +85,7 @@ async def remover_empresa(
         filtros = Filtros(
             {
                 "id": comando.id,
+                "email": Email(comando.email) if comando.email else None,
             }
         )
         empresa = await repo_dominio.consultar_um_por_filtros(filtros=filtros)

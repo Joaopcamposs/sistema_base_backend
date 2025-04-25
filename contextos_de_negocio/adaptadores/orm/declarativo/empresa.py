@@ -21,7 +21,7 @@ class EmpresaDB(Base, CamposBaseDB):
         nullable=False,
         unique=True,
     )
-    cpf: Mapped[str] = mapped_column(String(11), nullable=True, unique=False)
+    cpf: Mapped[str] = mapped_column(String(11), nullable=False, unique=False)
     cnpj: Mapped[str] = mapped_column(String(14), nullable=True, unique=False)
     ativo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
@@ -29,7 +29,7 @@ class EmpresaDB(Base, CamposBaseDB):
     usuarios = relationship(
         "UsuarioDB",
         back_populates="empresa",
-        foreign_keys=[UsuarioDB.empresa_id],  # <--- E TAMBÉM AQUI
+        foreign_keys=[UsuarioDB.empresa_id],
     )
 
     def __repr__(self):

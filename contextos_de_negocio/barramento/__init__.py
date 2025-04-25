@@ -16,12 +16,14 @@ def bootstrap(
     erros_de_eventos_para_subir: list[type[Exception]] | None = None,
     permitir_execucoes_assincronas: bool = True,
     somente_leitura: bool = False,
+    eh_criacao_de_nova_empresa: bool = False,
 ):
     if uow is None:
         uow = UnidadeDeTrabalho(
             usuario=usuario,
             schema=schema,
             somente_leitura=somente_leitura,
+            eh_criacao_de_nova_empresa=eh_criacao_de_nova_empresa,
         )
 
     command_handlers = command_handlers or COMMAND_HANDLERS

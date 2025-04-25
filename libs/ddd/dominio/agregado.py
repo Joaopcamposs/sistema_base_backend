@@ -1,8 +1,13 @@
+import hashlib
+import os
 from abc import ABC
 from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID
 
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+from libs.utils.constantes import pwd_context, AES_KEY
 from libs.utils.tipos_basicos import TipoDeOperacao
 
 
@@ -52,3 +57,37 @@ class Agregado(CamposBase):
         assert issubclass(type(event), Evento)
         self.eventos = getattr(self, "eventos", [])
         self.eventos.append(event)
+
+
+@dataclass
+class SegurancaDoUsuario:
+    def verificar_senha(self, senha: str) -> bool:
+        if getattr(self, "senha_hash", None):
+            senha_hash = self.senha_hash  # noqa: F821
+        else:
+            senha_hash = self._senha_hash  # noqa: F821
+
+        senhas_conferem = pwd_context.verify(secret=senha, hash=senha_hash)
+        return senhas_conferem
+
+    @staticmethod
+    def criptografar_senha(senha: str) -> str:
+        senha_criptografada = pwd_context.hash(secret=senha)
+        return senha_criptografada
+
+    @staticmethod
+    def hash_email(email: str) -> str:
+        return hashlib.sha256(email.strip().lower().encode()).hexdigest()
+
+    @staticmethod
+    def criptografar_email(email: str) -> bytes:
+        aesgcm = AESGCM(AES_KEY)
+        nonce = os.urandom(12)
+        ct = aesgcm.encrypt(nonce, email.encode(), None)
+        return nonce + ct
+
+    @staticmethod
+    def descriptografar_email(email: bytes) -> str:
+        aesgcm = AESGCM(AES_KEY)
+        nonce, ct = email[:12], email[12:]
+        return aesgcm.decrypt(nonce, ct, None).decode()
