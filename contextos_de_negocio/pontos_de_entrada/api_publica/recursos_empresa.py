@@ -23,7 +23,11 @@ from contextos_de_negocio.servicos.executores.seguranca import (
     current_user,
 )
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
-from infra.banco_de_dados import excluir_schema, criar_schema_e_tabelas
+from infra.banco_de_dados import (
+    excluir_schema,
+    criar_schema_e_tabelas,
+    validar_email_da_empresa,
+)
 from libs.ddd.barramento import logger
 from libs.utils.constantes import CHAVE_SECRETA
 
@@ -56,6 +60,8 @@ async def cadastrar(
     id_empresa = uuid4()
 
     try:
+        await validar_email_da_empresa(novo_empresa.email)
+
         await criar_schema_e_tabelas(str(id_empresa))
 
         bus = bootstrap(

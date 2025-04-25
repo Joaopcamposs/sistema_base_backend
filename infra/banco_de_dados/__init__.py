@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from libs.ddd.adaptadores.orm.declarativo import Base
+from libs.ddd.dominio.agregado import SegurancaDoUsuario
 from libs.utils.constantes import (
     DB_HOST,
     DB_PASSWORD,
@@ -162,7 +163,7 @@ async def verificar_schema_existente(conn: AsyncConnection, schema_id: str) -> N
 
 async def excluir_schema(schema_id: str) -> None:
     async with get_sql_engine().begin() as conn:
-        await conn.execute(text(f'DROP SCHEMA "{schema_id}" CASCADE;'))
+        await conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema_id}" CASCADE;'))
 
 
 async def criar_schema_e_tabelas(schema_id: str):
@@ -196,3 +197,18 @@ async def criar_schema_e_tabelas(schema_id: str):
                 table.schema = None
     finally:
         await engine_temp.dispose()
+
+
+async def validar_email_da_empresa(email: str) -> None:
+    """
+    Percorre a tabela public.usuario_publico e verifica se o hash do email é igual a algum existente
+    """
+    email_hash = SegurancaDoUsuario.hash_email(email)
+    async with get_sql_engine().begin() as conn:
+        result = await conn.execute(
+            text(
+                f"SELECT email_hash FROM public.usuario_publico WHERE email_hash = '{email_hash}'"
+            )
+        )
+        if result.fetchone():
+            raise ValueError(f"Email {email} já existe em outra empresa!")
