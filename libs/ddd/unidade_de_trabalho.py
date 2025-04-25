@@ -30,6 +30,7 @@ class UnidadeDeTrabalhoAbstrata(ABC):
     session_leitura: AsyncSession
     usuario: "UsuarioEntidade" | None  # noqa: F821
     schema: str | None = None  # todo verificar
+    criar_schema: bool = False
 
     eventos_fora_de_agregado: list["Evento"] = []  # noqa: F821
 
@@ -38,10 +39,11 @@ class UnidadeDeTrabalhoAbstrata(ABC):
         session_factory=DEFAULT_SQL_SESSION_FACTORY,
         usuario: "UsuarioEntidade" | None = None,  # noqa: F821
         schema: str | None = None,
-        eh_criacao_de_nova_empresa: bool = False,
+        criar_schema: bool = False,
     ) -> None:
         self.sql_session_factory = session_factory or DEFAULT_SQL_SESSION_FACTORY
         self.usuario = usuario
+        self.criar_schema = criar_schema
 
         if (
             all(
@@ -51,7 +53,7 @@ class UnidadeDeTrabalhoAbstrata(ABC):
                     str(usuario.empresa) != str(schema),
                 ]
             )
-            and not eh_criacao_de_nova_empresa
+            and not criar_schema
         ):
             raise UnidadeDeTrabalhoSchemaComProblema(
                 "O usuário não pertence a esse schema."

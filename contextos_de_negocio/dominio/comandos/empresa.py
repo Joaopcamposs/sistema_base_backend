@@ -6,15 +6,20 @@ from libs.ddd.barramento import Comando
 
 @dataclass
 class CadastrarEmpresa(Comando):
+    """
+    Para cadastrar uma nova empresa, deve ser gerado um id, passar esse id para o schema no bootstrap
+    e informar o mesmo ID aqui no comando.
+    """
+
     razao_social: str
     nome_responsavel: str
     ativo: bool
     cpf: str
     email: str
     senha: str
+    id: UUID
     cnpj: str | None = None
     nome_fantasia: str | None = None
-    id: UUID | None = None
     deve_criar_usuario: bool = True
 
 

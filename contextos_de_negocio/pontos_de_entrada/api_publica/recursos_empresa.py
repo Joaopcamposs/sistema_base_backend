@@ -23,12 +23,6 @@ from contextos_de_negocio.servicos.executores.seguranca import (
     current_user,
 )
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
-from infra.banco_de_dados import (
-    excluir_schema,
-    criar_schema_e_tabelas,
-    validar_email_da_empresa,
-)
-from libs.ddd.barramento import logger
 from libs.utils.constantes import CHAVE_SECRETA
 
 router_empresa = APIRouter(
@@ -59,36 +53,27 @@ async def cadastrar(
 
     id_empresa = uuid4()
 
-    try:
-        await validar_email_da_empresa(novo_empresa.email)
+    bus = bootstrap(
+        usuario=current_user.get(),
+        schema=str(id_empresa),
+        criar_schema=True,
+    )
 
-        await criar_schema_e_tabelas(str(id_empresa))
+    comando = CadastrarEmpresa(
+        razao_social=novo_empresa.razao_social,
+        nome_responsavel=novo_empresa.nome_responsavel,
+        ativo=novo_empresa.ativo,
+        cpf=novo_empresa.cpf,
+        email=novo_empresa.email,
+        senha=novo_empresa.senha,
+        cnpj=novo_empresa.cnpj,
+        nome_fantasia=novo_empresa.nome_fantasia,
+        id=id_empresa,
+        deve_criar_usuario=novo_empresa.deve_criar_usuario,
+    )
+    retorno = await bus.handle(comando)
 
-        bus = bootstrap(
-            usuario=current_user.get(),
-            schema=str(id_empresa),
-            eh_criacao_de_nova_empresa=True,
-        )
-
-        comando = CadastrarEmpresa(
-            razao_social=novo_empresa.razao_social,
-            nome_responsavel=novo_empresa.nome_responsavel,
-            ativo=novo_empresa.ativo,
-            cpf=novo_empresa.cpf,
-            email=novo_empresa.email,
-            senha=novo_empresa.senha,
-            cnpj=novo_empresa.cnpj,
-            nome_fantasia=novo_empresa.nome_fantasia,
-            id=id_empresa,
-            deve_criar_usuario=novo_empresa.deve_criar_usuario,
-        )
-        retorno = await bus.handle(comando)
-
-        return JSONResponse(status_code=HTTPStatus.CREATED, content=str(retorno))
-    except Exception as erro:
-        await excluir_schema(str(id_empresa))
-        logger.error(f"Erro ao criar empresa. O schema {id_empresa} foi dropado", erro)
-        raise erro
+    return JSONResponse(status_code=HTTPStatus.CREATED, content=str(retorno))
 
 
 @router_empresa.put("/empresa", response_model=LerEmpresaSchema)

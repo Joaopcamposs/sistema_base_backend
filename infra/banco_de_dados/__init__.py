@@ -88,12 +88,15 @@ async def DEFAULT_SQL_SESSION_FACTORY(
     somente_leitura: bool,
     schema: str | None = None,
     isolation_level: str = "READ COMMITTED",
+    force_create_engine: bool = False,
 ) -> AsyncSession:
     """
     Cria uma sessão SQLAlchemy, somente leitura ou não, com o esquema especificado.
     Deve ser utilizada internamente em estruturas que lidam com contextos, como a UnidadeDeTrabalho.
     """
-    _engine = get_sql_engine(isolation_level=isolation_level)
+    _engine = get_sql_engine(
+        isolation_level=isolation_level, force_create_engine=force_create_engine
+    )
 
     schema_atual = schema or "public"
     execution_options = dict(schema_translate_map={None: schema_atual})
@@ -212,3 +215,23 @@ async def validar_email_da_empresa(email: str) -> None:
         )
         if result.fetchone():
             raise ValueError(f"Email {email} já existe em outra empresa!")
+
+
+async def criar_schema_completo_dentro_de_uma_transacao(
+    schema_id: str, session_factory: callable
+):
+    await criar_schema_e_tabelas(schema_id)
+
+    session = await session_factory(
+        somente_leitura=False, schema=str(schema_id), force_create_engine=True
+    )
+
+    # engine = session.get_bind()
+    # if not engine.dialect.has_schema(engine, schema_id):
+    #     session.execute(sqlalchemy.schema.CreateSchema(schema_id))
+    #     force_create_tables = True
+    #     session.commit()
+    # if force_create_tables:
+    #     create_all(session)
+
+    return session

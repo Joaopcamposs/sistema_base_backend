@@ -28,8 +28,8 @@ class AtualizarEmpresaSchema(BaseModel):
 
 class LerEmpresaSchema(BaseModel):
     id: UUID4
-    razao_social: str | None = None
-    nome_fantasia: str
+    razao_social: str
+    nome_fantasia: str | None = None
     nome_responsavel: str
     email: str
     cpf: str | None = None

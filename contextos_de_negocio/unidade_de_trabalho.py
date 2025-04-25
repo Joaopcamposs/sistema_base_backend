@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Generic, TypeVar
 
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
+from infra.banco_de_dados import criar_schema_completo_dentro_de_uma_transacao
 from libs.ddd.adaptadores.repositorio.repositorio import (
     RepositorioDominio,
     RepositorioConsulta,
@@ -24,23 +25,29 @@ class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata, Generic[REPO_ESCRITA, REPO_LE
         usuario: UsuarioEntidade | None = None,
         schema: str | None = None,
         somente_leitura: bool = False,
-        eh_criacao_de_nova_empresa: bool = False,
+        criar_schema: bool = False,
     ):
         self.somente_leitura = somente_leitura
 
         super().__init__(
             usuario=usuario,
             schema=schema,
-            eh_criacao_de_nova_empresa=eh_criacao_de_nova_empresa,
+            criar_schema=criar_schema,
         )
 
     async def __aenter__(self) -> UnidadeDeTrabalho:
         self.commited = False
 
-        # verificar add schema
-        self.session = await self.sql_session_factory(
-            somente_leitura=False, schema=self.schema
-        )
+        if self.criar_schema:
+            self.session = await criar_schema_completo_dentro_de_uma_transacao(
+                schema_id=self.schema, session_factory=self.sql_session_factory
+            )
+            self.criar_schema = False
+        else:
+            self.session = await self.sql_session_factory(
+                somente_leitura=False,
+                schema=self.schema,
+            )
         self.session_leitura = await self.sql_session_factory(
             somente_leitura=True, schema=self.schema
         )

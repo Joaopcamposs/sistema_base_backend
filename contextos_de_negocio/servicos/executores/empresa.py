@@ -6,7 +6,9 @@ from contextos_de_negocio.dominio.comandos.empresa import (
     RemoverEmpresa,
 )
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
+from infra.banco_de_dados import validar_email_da_empresa, excluir_schema
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
+from libs.ddd.barramento import logger
 from libs.utils.tipos_basicos import Email
 
 
@@ -15,27 +17,36 @@ async def cadastrar_empresa(
 ) -> UUID:
     from contextos_de_negocio import Dominio, EmpresaRepoDominio
 
-    async with unidade_de_trabalho(Dominio.empresa) as uow:
-        repo_dominio: EmpresaRepoDominio = uow.domain_repo
+    try:
+        async with unidade_de_trabalho(Dominio.empresa) as uow:
+            repo_dominio: EmpresaRepoDominio = uow.domain_repo
 
-        nova_empresa = await repo_dominio.gerar_agregado_para_cadastro(
-            razao_social=comando.razao_social,
-            nome_fantasia=comando.nome_fantasia,
-            nome_responsavel=comando.nome_responsavel,
-            email=comando.email,
-            cpf=comando.cpf,
-            cnpj=comando.cnpj,
-            ativo=comando.ativo,
-            id=comando.id,
+            await validar_email_da_empresa(comando.email)
+
+            nova_empresa = await repo_dominio.gerar_agregado_para_cadastro(
+                razao_social=comando.razao_social,
+                nome_fantasia=comando.nome_fantasia,
+                nome_responsavel=comando.nome_responsavel,
+                email=comando.email,
+                cpf=comando.cpf,
+                cnpj=comando.cnpj,
+                ativo=comando.ativo,
+                id=comando.id,
+            )
+            nova_empresa.cadastrar(usuario=uow.usuario, senha=comando.senha)
+
+            await repo_dominio.adicionar(
+                empresa=nova_empresa,
+            )
+            await uow.commit()
+
+        return nova_empresa.id
+    except Exception as erro:
+        await excluir_schema(str(comando.id))
+        logger.error(
+            f"Erro ao criar empresa. O schema {str(comando.id)} foi dropado", erro
         )
-        nova_empresa.cadastrar(usuario=uow.usuario, senha=comando.senha)
-
-        await repo_dominio.adicionar(
-            empresa=nova_empresa,
-        )
-        await uow.commit()
-
-    return nova_empresa.id
+        raise erro
 
 
 async def atualizar_empresa(
