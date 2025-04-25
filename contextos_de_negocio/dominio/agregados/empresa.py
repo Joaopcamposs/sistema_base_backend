@@ -9,6 +9,9 @@ from contextos_de_negocio.dominio.eventos.empresa import (
 )
 
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
+from contextos_de_negocio.dominio.eventos.usuario import (
+    ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
+)
 from libs.utils.tipos_basicos import Email, TipoDeOperacao
 from libs.ddd.dominio.agregado import Agregado
 
@@ -55,11 +58,22 @@ class Empresa(Agregado):
             _tipo_de_operacao=TipoDeOperacao.INSERCAO,
         )
 
-    def cadastrar(self, usuario: UsuarioEntidade) -> None:
+    def cadastrar(self, usuario: UsuarioEntidade, senha: str) -> None:
         self.criado_por = None  # nao registraremos o usuario que criou
         self.criado_em = datetime.now()
 
         self.add_event(EmpresaCriada(id=self.id))
+        self.add_event(
+            ChegouAHoraDeCriarUsuarioInicialDaEmpresa(
+                nome=self.nome_responsavel,
+                email=self.email,
+                cpf=self.cpf,
+                senha=senha,
+                ativo=True,
+                adm=True,
+                empresa=self.id,
+            )
+        )
 
     def atualizar(
         self,

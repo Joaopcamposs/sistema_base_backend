@@ -11,9 +11,11 @@ class CadastrarEmpresa(Comando):
     ativo: bool
     cpf: str
     email: str
+    senha: str
     cnpj: str | None = None
     nome_fantasia: str | None = None
     id: UUID | None = None
+    deve_criar_usuario: bool = True
 
 
 @dataclass

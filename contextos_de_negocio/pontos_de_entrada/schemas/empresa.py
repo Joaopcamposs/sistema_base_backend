@@ -8,9 +8,11 @@ class CadastrarEmpresaSchema(BaseModel):
     nome_fantasia: str | None = None
     nome_responsavel: str
     email: str
+    senha: str
     cpf: str | None = None
     cnpj: str | None = None
     ativo: bool
+    deve_criar_usuario: bool = False
     chave_secreta: str | None = None
 
 

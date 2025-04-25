@@ -70,9 +70,11 @@ async def cadastrar(
             ativo=novo_empresa.ativo,
             cpf=novo_empresa.cpf,
             email=novo_empresa.email,
+            senha=novo_empresa.senha,
             cnpj=novo_empresa.cnpj,
             nome_fantasia=novo_empresa.nome_fantasia,
             id=id_empresa,
+            deve_criar_usuario=novo_empresa.deve_criar_usuario,
         )
         retorno = await bus.handle(comando)
 

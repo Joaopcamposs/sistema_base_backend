@@ -19,6 +19,7 @@ from contextos_de_negocio.dominio.eventos.usuario import (
     UsuarioCriado,
     UsuarioAtualizado,
     UsuarioRemovido,
+    ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
 )
 from contextos_de_negocio.servicos.executores.empresa import (
     cadastrar_empresa,
@@ -47,6 +48,7 @@ EVENT_HANDLERS: dict[type[Evento], list[callable]] = {
     EmpresaCriada: [],
     EmpresaAtualizada: [],
     EmpresaRemovida: [],
+    ChegouAHoraDeCriarUsuarioInicialDaEmpresa: [cadastrar_usuario],
 }
 
 COMMAND_HANDLERS: dict[type[Comando], callable] = {

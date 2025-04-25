@@ -6,13 +6,17 @@ from contextos_de_negocio.dominio.comandos.usuario import (
     AtualizarUsuario,
     RemoverUsuario,
 )
-from contextos_de_negocio.dominio.eventos.usuario import UsuarioCriado
+from contextos_de_negocio.dominio.eventos.usuario import (
+    UsuarioCriado,
+    ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
+)
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
 
 
 async def cadastrar_usuario(
-    comando: CadastrarUsuario, unidade_de_trabalho: UnidadeDeTrabalho
+    comando_ou_evento: CadastrarUsuario | ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
+    unidade_de_trabalho: UnidadeDeTrabalho,
 ) -> UUID:
     from contextos_de_negocio import Dominio, UsuarioRepoDominio
 
@@ -20,14 +24,14 @@ async def cadastrar_usuario(
         repo_dominio: UsuarioRepoDominio = uow.domain_repo
 
         novo_usuario = await repo_dominio.gerar_agregado_para_cadastro(
-            empresa=comando.empresa,
-            nome=comando.nome,
-            email=comando.email,
-            cpf=comando.cpf,
-            senha=comando.senha,
-            adm=comando.adm,
-            ativo=comando.ativo,
-            permissoes=comando.permissoes,
+            empresa=comando_ou_evento.empresa,
+            nome=comando_ou_evento.nome,
+            email=comando_ou_evento.email,
+            cpf=comando_ou_evento.cpf,
+            senha=comando_ou_evento.senha,
+            adm=comando_ou_evento.adm,
+            ativo=comando_ou_evento.ativo,
+            permissoes=comando_ou_evento.permissoes,
         )
         novo_usuario.cadastrar(
             usuario=uow.usuario,

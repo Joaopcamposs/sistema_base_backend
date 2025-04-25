@@ -28,9 +28,7 @@ async def cadastrar_empresa(
             ativo=comando.ativo,
             id=comando.id,
         )
-        nova_empresa.cadastrar(
-            usuario=uow.usuario,
-        )
+        nova_empresa.cadastrar(usuario=uow.usuario, senha=comando.senha)
 
         await repo_dominio.adicionar(
             empresa=nova_empresa,

@@ -29,11 +29,13 @@ class UsuarioDB(Base, CamposBaseDB):
     empresa = relationship(
         "EmpresaDB",
         back_populates="usuarios",
-        foreign_keys=[empresa_id],  # <--- RESOLVE AMBIGUIDADE AQUI
+        foreign_keys=[empresa_id],
     )
 
     def __repr__(self):
-        return f"Usuario(email={self.email}, id={self.id})"
+        return (
+            f"UsuarioDB(email={self.email}, id={self.id}, empresa_id={self.empresa_id})"
+        )
 
     def __hash__(self):
         return hash(self.id)
@@ -54,3 +56,9 @@ class UsuarioPublicoDB(Base, CamposBaseDB):
         String(64), nullable=False, unique=True, index=True
     )
     senha_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+
+    def __repr__(self):
+        return f"UsuarioPublicoDB(id={self.id}, empresa_id={self.empresa_id})"
+
+    def __hash__(self):
+        return hash(self.id)

@@ -5,7 +5,6 @@ from uuid import uuid4
 from sqlalchemy import UUID, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from contextos_de_negocio.adaptadores.orm.declarativo.usuario import UsuarioDB
 from libs.ddd.adaptadores.orm.declarativo import Base, CamposBaseDB
 
 
@@ -29,11 +28,12 @@ class EmpresaDB(Base, CamposBaseDB):
     usuarios = relationship(
         "UsuarioDB",
         back_populates="empresa",
-        foreign_keys=[UsuarioDB.empresa_id],
+        foreign_keys="[UsuarioDB.empresa_id]",
+        primaryjoin="EmpresaDB.id==UsuarioDB.empresa_id",
     )
 
     def __repr__(self):
-        return f"Empresa(id={self.id}, razao_social={self.razao_social})"
+        return f"EmpresaDB(id={self.id}, razao_social={self.razao_social}, email={self.email})"
 
     def __hash__(self):
         return hash(self.id)

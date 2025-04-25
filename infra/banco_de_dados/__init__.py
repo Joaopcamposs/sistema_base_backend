@@ -174,24 +174,25 @@ async def criar_schema_e_tabelas(schema_id: str):
     # criar engine temporária
     engine_temp: AsyncEngine = get_sql_engine(force_create_engine=True)
 
-    # 1) criar schema
-    async with engine_temp.begin() as conn:
-        await verificar_schema_existente(conn, schema_id)
-        await conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema_id}"'))
+    try:
+        # 1) criar schema
+        async with engine_temp.begin() as conn:
+            await verificar_schema_existente(conn, schema_id)
+            await conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema_id}"'))
 
-    # 2) atribuir schema nos objetos
-    for table in Base.metadata.sorted_tables:
-        if table.schema != "public":
-            table.schema = schema_id
+        # 2) atribuir schema nos objetos
+        for table in Base.metadata.sorted_tables:
+            if table.schema != "public":
+                table.schema = schema_id
 
-    # 3) criar tabelas no novo schema
-    async with engine_temp.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        # 3) criar tabelas no novo schema
+        async with engine_temp.begin() as conn:
+            for table in Base.metadata.sorted_tables:
+                await conn.run_sync(table.create)
 
-    # fechar a engine temporária
-    await engine_temp.dispose()
-
-    # 4) restaurar esquema padrão (public)
-    for table in Base.metadata.sorted_tables:
-        if table.schema != "public":
-            table.schema = None
+        # 4) restaurar esquema padrão (public)
+        for table in Base.metadata.sorted_tables:
+            if table.schema != "public":
+                table.schema = None
+    finally:
+        await engine_temp.dispose()
