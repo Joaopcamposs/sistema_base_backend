@@ -5,4 +5,5 @@ line-length = 90
 "__init__.py" = ["E402", "F403", "F401"]
 "**/{tests}/*" = ["E402", "F403"]
 "conftest.py" = ["F401"]  # Ignora F401 apenas no conftest.py
+"infra/aplicacoes/celery/tarefas.py" = ["F401"]  # Ignora F401 apenas no tasks.py
 'infra/aplicacoes/celery/worker.py' = ["F401"]  # Ignora E501 apenas no worker.py

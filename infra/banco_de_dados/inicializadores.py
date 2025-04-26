@@ -1,6 +1,5 @@
 from uuid import UUID, uuid4
 
-
 from contextos_de_negocio.barramento import bootstrap
 from contextos_de_negocio.dominio.comandos.empresa import CadastrarEmpresa
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
@@ -8,7 +7,6 @@ from infra.banco_de_dados import (
     listar_schemas_existentes,
     excluir_schema,
 )
-from libs.ddd.barramento import logger
 from libs.utils.constantes import (
     SENHA_PRIMEIRO_USUARIO,
     EMAIL_PRIMEIRO_USUARIO,
@@ -61,7 +59,5 @@ async def criar_primeira_empresa_e_usuario() -> None:
         )
     except Exception as erro:
         await excluir_schema(str(id_empresa))
-        logger.error(
-            f"Erro ao criar empresa. O schema {str(id_empresa)} foi dropado", erro
-        )
+        print(f"Erro ao criar empresa. O schema {str(id_empresa)} foi dropado", erro)
         raise erro

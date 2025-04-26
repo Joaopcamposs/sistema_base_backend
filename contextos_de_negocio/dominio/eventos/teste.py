@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from libs.ddd.barramento import Evento
+from barramento_de_mensagens.base.barramento import Evento
 
 
 @dataclass(kw_only=True)

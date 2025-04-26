@@ -1,4 +1,5 @@
 from celery import Celery
+from barramento_de_mensagens.aplicacoes.celery import configurar_celery_app
 
 from infra.banco_de_dados import obter_uri_do_celery
 
@@ -16,3 +17,4 @@ celery_app.conf.update(
     accept_content=["pickle"],
     result_serializer="pickle",
 )
+configurar_celery_app(celery_app)

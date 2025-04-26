@@ -24,6 +24,7 @@ mypy = "^1.15.0"
 pre-commit = "^4.2.0"
 pyjwt = "^2.10.1"
 cryptography = "^44.0.2"
+barramento-de-mensagens = {git = "https://github.com/Joaopcamposs/barramento_de_mensagens.git", rev = "v0.1.4"}
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

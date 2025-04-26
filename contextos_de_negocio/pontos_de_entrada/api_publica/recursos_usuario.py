@@ -24,7 +24,7 @@ from contextos_de_negocio.servicos.executores.seguranca import (
     get_current_user,
     current_user,
 )
-from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
+from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 
 router_usuario = APIRouter(
     prefix="/api/v1", tags=["Usuários"], dependencies=[Depends(get_current_user)]

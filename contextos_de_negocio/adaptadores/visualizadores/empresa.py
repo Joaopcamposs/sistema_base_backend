@@ -1,7 +1,7 @@
 from pydantic import UUID4
 
 from contextos_de_negocio.dominio.entidades.empresa import EmpresaEntidade
-from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
+from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
 
 

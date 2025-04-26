@@ -1,6 +1,6 @@
 from contextos_de_negocio.dominio.comandos.teste import ComandoTeste
 from contextos_de_negocio.dominio.eventos.teste import EventoTeste, EventoTesteAssincrono
-from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
+from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 
 
 async def comando_teste(comando: ComandoTeste, uow: UnidadeDeTrabalho) -> str:

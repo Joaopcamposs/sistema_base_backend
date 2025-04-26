@@ -1,11 +1,12 @@
 from typing import Callable
 
+from barramento_de_mensagens.base.barramento import Evento, Comando, BarramentoDeMensagens
+from barramento_de_mensagens.base.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
+from barramento_de_mensagens.bootstrap import bootstrap_base
+
 from contextos_de_negocio.barramento.manipuladores import COMMAND_HANDLERS, EVENT_HANDLERS
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
-from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
-from libs.ddd.barramento import Evento, Comando, BarramentoDeMensagens
-from libs.ddd.bootstrap import bootstrap_base
-from libs.ddd.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
+from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 
 
 def bootstrap(

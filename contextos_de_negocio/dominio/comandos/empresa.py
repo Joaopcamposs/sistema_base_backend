@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from libs.ddd.barramento import Comando
+from barramento_de_mensagens.base.barramento import Comando
 
 
 @dataclass

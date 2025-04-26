@@ -23,7 +23,7 @@ from contextos_de_negocio.servicos.executores.seguranca import (
     get_current_user,
     current_user,
 )
-from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
+from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.utils.constantes import CHAVE_SECRETA
 
 router_empresa = APIRouter(

@@ -5,10 +5,9 @@ from contextos_de_negocio.dominio.comandos.empresa import (
     AtualizarEmpresa,
     RemoverEmpresa,
 )
-from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
+from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 from infra.banco_de_dados import validar_email_da_empresa, excluir_schema
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
-from libs.ddd.barramento import logger
 from libs.utils.tipos_basicos import Email
 
 
@@ -44,9 +43,7 @@ async def cadastrar_empresa(
         return nova_empresa.id
     except Exception as erro:
         await excluir_schema(str(comando.id))
-        logger.error(
-            f"Erro ao criar empresa. O schema {str(comando.id)} foi dropado", erro
-        )
+        print(f"Erro ao criar empresa. O schema {str(comando.id)} foi dropado", erro)
         raise erro
 
 

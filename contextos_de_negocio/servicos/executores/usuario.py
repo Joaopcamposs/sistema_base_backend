@@ -11,7 +11,7 @@ from contextos_de_negocio.dominio.eventos.usuario import (
     ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
     ChegouAHoraDeCriarUsuarioADMDaEmpresa,
 )
-from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
+from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
 
 
