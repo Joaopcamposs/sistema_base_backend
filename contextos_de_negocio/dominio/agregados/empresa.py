@@ -11,7 +11,9 @@ from contextos_de_negocio.dominio.eventos.empresa import (
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
 from contextos_de_negocio.dominio.eventos.usuario import (
     ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
+    ChegouAHoraDeCriarUsuarioADMDaEmpresa,
 )
+from libs.utils.constantes import PREFIXO_USUARIO_ADM
 from libs.utils.tipos_basicos import Email, TipoDeOperacao
 from libs.ddd.dominio.agregado import Agregado
 
@@ -26,6 +28,8 @@ class Empresa(Agregado):
     cpf: str
     nome_fantasia: str | None = None
     cnpj: str | None = None
+
+    _eh_primeira_empresa: bool = False
 
     def __post_init__(self) -> None:
         self._usa_soft_delete = True
@@ -44,6 +48,7 @@ class Empresa(Agregado):
         cnpj: str | None,
         ativo: bool,
         id: UUID | None = None,
+        _eh_primeira_empresa: bool = False,
     ) -> "Empresa":
         email = Email(email)
         return Empresa(
@@ -56,6 +61,7 @@ class Empresa(Agregado):
             ativo=ativo,
             id=id or uuid4(),
             _tipo_de_operacao=TipoDeOperacao.INSERCAO,
+            _eh_primeira_empresa=_eh_primeira_empresa,
         )
 
     def cadastrar(self, usuario: UsuarioEntidade, senha: str) -> None:
@@ -74,6 +80,12 @@ class Empresa(Agregado):
                 empresa=self.id,
             )
         )
+        if not self._eh_primeira_empresa:
+            self.add_event(
+                ChegouAHoraDeCriarUsuarioADMDaEmpresa(
+                    empresa=self.id, email=f"{PREFIXO_USUARIO_ADM}@{str(self.id)}.com"
+                )
+            )
 
     def atualizar(
         self,

@@ -32,6 +32,7 @@ async def cadastrar_empresa(
                 cnpj=comando.cnpj,
                 ativo=comando.ativo,
                 id=comando.id,
+                _eh_primeira_empresa=comando._eh_primeira_empresa,
             )
             nova_empresa.cadastrar(usuario=uow.usuario, senha=comando.senha)
 

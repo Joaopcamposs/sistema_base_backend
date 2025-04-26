@@ -52,6 +52,7 @@ class EmpresaRepoDominio(EmpresaRepoDominioAbstrato):
         cnpj: str,
         ativo: bool,
         id: UUID | None = None,
+        _eh_primeira_empresa: bool = False,
     ) -> Empresa:
         async with self.session as session:
             empresa_com_mesmo_email = (
@@ -73,6 +74,7 @@ class EmpresaRepoDominio(EmpresaRepoDominioAbstrato):
             cnpj=cnpj,
             ativo=ativo,
             id=id,
+            _eh_primeira_empresa=_eh_primeira_empresa,
         )
 
     async def consultar_um_por_filtros(self, filtros: Filtros) -> Empresa:

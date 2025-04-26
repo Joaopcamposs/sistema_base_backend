@@ -9,13 +9,16 @@ from contextos_de_negocio.dominio.comandos.usuario import (
 from contextos_de_negocio.dominio.eventos.usuario import (
     UsuarioCriado,
     ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
+    ChegouAHoraDeCriarUsuarioADMDaEmpresa,
 )
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
 
 
 async def cadastrar_usuario(
-    comando_ou_evento: CadastrarUsuario | ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
+    comando_ou_evento: CadastrarUsuario
+    | ChegouAHoraDeCriarUsuarioInicialDaEmpresa
+    | ChegouAHoraDeCriarUsuarioADMDaEmpresa,
     unidade_de_trabalho: UnidadeDeTrabalho,
 ) -> UUID:
     from contextos_de_negocio import Dominio, UsuarioRepoDominio

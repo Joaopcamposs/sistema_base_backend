@@ -21,6 +21,7 @@ class CadastrarEmpresa(Comando):
     cnpj: str | None = None
     nome_fantasia: str | None = None
     deve_criar_usuario: bool = True
+    _eh_primeira_empresa: bool = False
 
 
 @dataclass

@@ -56,6 +56,7 @@ async def criar_primeira_empresa_e_usuario() -> None:
                 cpf=CPF_PRIMEIRO_USUARIO,
                 ativo=True,
                 deve_criar_usuario=True,
+                _eh_primeira_empresa=True,
             )
         )
     except Exception as erro:
