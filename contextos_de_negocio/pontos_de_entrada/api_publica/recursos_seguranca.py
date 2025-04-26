@@ -38,5 +38,5 @@ async def login_for_access_token(
 @router_seguranca.get("/users/me/", response_model=LerUsuarioSchema)
 async def read_users_me(
     current_user: Annotated[UsuarioEntidade, Depends(get_current_active_user)],
-):
+) -> UsuarioEntidade:
     return current_user

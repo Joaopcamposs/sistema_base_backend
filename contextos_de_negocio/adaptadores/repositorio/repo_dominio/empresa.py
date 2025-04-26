@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select, insert, update, delete
@@ -16,7 +17,7 @@ from libs.utils.tipos_basicos import Email, TipoDeOperacao
 
 
 class EmpresaRepoDominioAbstrato(RepositorioDominio):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: dict[str, Any], **kwargs: dict[str, Any]) -> None:
         super(EmpresaRepoDominioAbstrato, self).__init__(*args, **kwargs)
         self.seen: set[Empresa] = set()
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC
+from typing import Callable, Any, Generator
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,12 +37,12 @@ class UnidadeDeTrabalhoAbstrata(ABC):
 
     def __init__(
         self,
-        session_factory=DEFAULT_SQL_SESSION_FACTORY,
+        session_factory: Callable = DEFAULT_SQL_SESSION_FACTORY,
         usuario: "UsuarioEntidade" | None = None,  # noqa: F821
         schema: str | None = None,
         criar_schema: bool = False,
     ) -> None:
-        self.sql_session_factory = session_factory or DEFAULT_SQL_SESSION_FACTORY
+        self.sql_session_factory = session_factory or DEFAULT_SQL_SESSION_FACTORY  # type: ignore[truthy-function]
         self.usuario = usuario
         self.criar_schema = criar_schema
 
@@ -50,7 +51,7 @@ class UnidadeDeTrabalhoAbstrata(ABC):
                 [
                     schema,
                     usuario,
-                    str(usuario.empresa) != str(schema),
+                    str(usuario.empresa) != str(schema),  # type: ignore[union-attr]
                 ]
             )
             and not criar_schema
@@ -91,7 +92,7 @@ class UnidadeDeTrabalhoAbstrata(ABC):
 
         return self
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, *args: dict[str, Any]) -> None:
         self.__contexto_ativo = False
 
         if not self.commited:
@@ -103,13 +104,9 @@ class UnidadeDeTrabalhoAbstrata(ABC):
     def adicionar_evento_fora_de_agregado(self, evento: "Evento") -> None:  # noqa: F821
         self.eventos_fora_de_agregado.append(evento)
 
-    def collect_new_events(self):
-        repos = []
+    def collect_new_events(self) -> Generator[Any, None, None]:
         if hasattr(self, "domain_repo") and self.domain_repo:
-            repos.append(self.domain_repo)
-
-        for repo in repos:
-            for agregado in getattr(repo, "seen", set()):
+            for agregado in getattr(self.domain_repo, "seen", set()):
                 while getattr(agregado, "eventos", []):
                     yield agregado.eventos.pop(0)
 

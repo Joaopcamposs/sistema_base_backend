@@ -10,7 +10,7 @@ router_teste = APIRouter(prefix="/api/v1", tags=["Teste"])
 @router_teste.post("/comando_teste")
 async def comando_teste_api(
     mensagem: str,
-):
+) -> JSONResponse:
     from infra.banco_de_dados.inicializadores import gerar_usuario_fake_primeiro_cadastro
     from uuid import uuid4
 

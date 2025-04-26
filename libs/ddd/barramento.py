@@ -13,12 +13,11 @@ from libs.ddd.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 logger = logging.getLogger(__name__)
 
 
+@dataclass
 class BaseComandoOuEvento(ABC):
     CAMPOS_SENSIVEIS = {"senha", "password", "token", "pwd"}
 
-    def __new__(cls, *args, **kwargs) -> Any:
-        # Se a subclasse estiver redefinindo __repr__, substituímos pelo da classe base
-
+    def __new__(cls, *args: dict[str, Any], **kwargs: dict[str, Any]) -> Any:
         if "__repr__" in cls.__dict__:
             cls.__repr__ = BaseComandoOuEvento.__repr__
 
@@ -64,34 +63,33 @@ class BarramentoDeMensagens:
         uow: UnidadeDeTrabalhoAbstrata,
         event_handlers: dict[type[Evento], list[Callable]],
         command_handlers: dict[type[Comando], Callable],
-        subir_erros_de_eventos: bool = False,
-        erros_de_eventos_para_subir: list[type[Exception]] | None = None,
+        subir_erros_de_eventos: bool = True,
         permitir_execucoes_assincronas: bool = False,
     ):
         self.uow = uow
         self.event_handlers = event_handlers
         self.command_handlers = command_handlers
-        self.subir_erros_de_eventos: bool = subir_erros_de_eventos
-        self.erros_de_eventos_para_subir = erros_de_eventos_para_subir
+        self.subir_erros_de_eventos = subir_erros_de_eventos
         self.permitir_execucoes_assincronas = permitir_execucoes_assincronas
+        self.queue: list[Mensagem] = []
 
-    async def handle(self, message: Mensagem):
+    async def handle(self, message: Mensagem) -> Any | None:
         self.queue = [message]
 
-        self.command_result = None
+        command_result: Any | None = None
 
         while self.queue:
             message = self.queue.pop(0)
             if isinstance(message, Evento):
                 await self.handle_event(message)
             elif isinstance(message, Comando):
-                self.command_result = await self.handle_command(message)
+                command_result = await self.handle_command(message)
             else:
                 raise Exception(f"{message} was not an Event or Command")
 
-        return self.command_result
+        return command_result
 
-    async def handle_event(self, event: Evento):
+    async def handle_event(self, event: Evento) -> None:
         if (
             self.permitir_execucoes_assincronas
             and isinstance(event, Evento)
@@ -109,16 +107,8 @@ class BarramentoDeMensagens:
             except Exception as erro:
                 logger.exception(f"Exception handling event {event}")
 
-                eh_um_erro_apto_a_subir: bool = True
-                if self.erros_de_eventos_para_subir:
-                    eh_um_erro_apto_a_subir = isinstance(
-                        erro, tuple(self.erros_de_eventos_para_subir)
-                    )
-
                 # todo modificar para ficar de acordo com o projeto
-                if (self.subir_erros_de_eventos and eh_um_erro_apto_a_subir) or os.getenv(
-                    "ENV_CONFIG"
-                ) == "pytest":
+                if self.subir_erros_de_eventos or os.getenv("ENV_CONFIG") == "pytest":
                     # We must raise erros in event handling if is running tests
                     raise erro
 
@@ -128,7 +118,7 @@ class BarramentoDeMensagens:
 
                 continue
 
-    async def handle_async_event(self, event: Evento):
+    async def handle_async_event(self, event: Evento) -> None:
         from infra.aplicacoes.celery.tarefas import task_tratar_evento_asyncrono
 
         tarefa = task_tratar_evento_asyncrono.si(
@@ -145,11 +135,9 @@ class BarramentoDeMensagens:
             if event.prioridade_de_execucao_assincrona:
                 tarefa = tarefa.set(priority=event.prioridade_de_execucao_assincrona)
 
-        tarefa.delay()
+        tarefa.apply_async()
 
-        return
-
-    async def handle_command(self, command: Comando):
+    async def handle_command(self, command: Comando) -> Any | None:
         logger.debug(f"handling command {command}")
         try:
             handler = self.command_handlers[type(command)]

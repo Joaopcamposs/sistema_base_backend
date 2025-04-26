@@ -12,6 +12,7 @@ from contextos_de_negocio.dominio.comandos.empresa import (
     AtualizarEmpresa,
     RemoverEmpresa,
 )
+from contextos_de_negocio.dominio.entidades.empresa import EmpresaEntidade
 from contextos_de_negocio.dominio.excecoes import EmpresaNaoEncontrada
 from contextos_de_negocio.pontos_de_entrada.schemas.empresa import (
     LerEmpresaSchema,
@@ -31,8 +32,8 @@ router_empresa = APIRouter(
 
 
 @router_empresa.get("/empresas", response_model=list[LerEmpresaSchema])
-async def listar(id: UUID4 | None = None):
-    unidade_de_trabalho = UnidadeDeTrabalho(usuario=current_user.get())
+async def listar(id: UUID4 | None = None) -> list[EmpresaEntidade]:
+    unidade_de_trabalho: UnidadeDeTrabalho = UnidadeDeTrabalho(usuario=current_user.get())
 
     empresas = await listar_empresas_por_id(
         unidade_de_trabalho=unidade_de_trabalho, id=id
@@ -47,7 +48,7 @@ async def listar(id: UUID4 | None = None):
 @router_empresa.post("/empresa")
 async def cadastrar(
     novo_empresa: CadastrarEmpresaSchema,
-):
+) -> JSONResponse:
     if novo_empresa.chave_secreta != CHAVE_SECRETA:
         raise ValueError("Chave secreta inválida")
 
@@ -81,7 +82,7 @@ async def atualizar(
     empresa_atualizado: AtualizarEmpresaSchema,
     id: UUID4 | None = None,
     email: str | None = None,
-):
+) -> JSONResponse:
     bus = bootstrap(usuario=current_user.get())
 
     comando = AtualizarEmpresa(**empresa_atualizado.__dict__, id=id, email_antigo=email)
@@ -94,7 +95,7 @@ async def atualizar(
 async def remover(
     id: UUID4 | None = None,
     email: str | None = None,
-):
+) -> JSONResponse:
     bus = bootstrap(usuario=current_user.get())
 
     comando = RemoverEmpresa(id=id, email=email)

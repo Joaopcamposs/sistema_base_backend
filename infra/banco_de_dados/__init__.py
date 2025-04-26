@@ -1,6 +1,6 @@
 import os
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Callable
 
 from sqlalchemy import text, NullPool
 from sqlalchemy.ext.asyncio import (
@@ -46,12 +46,12 @@ def obter_uri_do_celery() -> str:
     return celery_uri
 
 
-async def set_schema_name(session: AsyncSession, schema: str):
+async def set_schema_name(session: AsyncSession, schema: str) -> None:
     await session.execute(text(f'SET search_path TO "{schema}"'))
     setattr(session, "schema", str(schema))
 
 
-def get_schema_name(session: AsyncSession):
+def get_schema_name(session: AsyncSession) -> str:
     return getattr(session, "schema", "public")
 
 
@@ -59,7 +59,7 @@ def get_sql_engine(
     isolation_level: str = "READ COMMITTED",
     force_create_engine: bool = False,
 ) -> AsyncEngine:
-    def _criar_engine_correta():
+    def _criar_engine_correta() -> AsyncEngine:
         global engine
 
         if force_create_engine:
@@ -111,7 +111,7 @@ async def DEFAULT_SQL_SESSION_FACTORY(
     )
     await set_schema_name(session, schema_atual)
 
-    async def async_close():
+    async def async_close() -> None:
         await session.close()
 
     # Anexa o métodu async para ser usado explicitamente
@@ -169,7 +169,7 @@ async def excluir_schema(schema_id: str) -> None:
         await conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema_id}" CASCADE;'))
 
 
-async def criar_schema_e_tabelas(schema_id: str):
+async def criar_schema_e_tabelas(schema_id: str) -> None:
     """
     1. Cria o schema no Postgres
     2. Ajusta os metadados para usar schema_id
@@ -218,20 +218,15 @@ async def validar_email_da_empresa(email: str) -> None:
 
 
 async def criar_schema_completo_dentro_de_uma_transacao(
-    schema_id: str, session_factory: callable
-):
+    schema_id: str | None, session_factory: Callable
+) -> AsyncSession:
     await criar_schema_e_tabelas(schema_id)
 
-    session = await session_factory(
-        somente_leitura=False, schema=str(schema_id), force_create_engine=True
-    )
+    if schema_id:
+        schema_id = str(schema_id)
 
-    # engine = session.get_bind()
-    # if not engine.dialect.has_schema(engine, schema_id):
-    #     session.execute(sqlalchemy.schema.CreateSchema(schema_id))
-    #     force_create_tables = True
-    #     session.commit()
-    # if force_create_tables:
-    #     create_all(session)
+    session = await session_factory(
+        somente_leitura=False, schema=schema_id, force_create_engine=True
+    )
 
     return session

@@ -32,8 +32,8 @@ class EmpresaDB(Base, CamposBaseDB):
         primaryjoin="EmpresaDB.id==UsuarioDB.empresa_id",
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"EmpresaDB(id={self.id}, razao_social={self.razao_social}, email={self.email})"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)

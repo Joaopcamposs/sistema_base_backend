@@ -32,5 +32,5 @@ class CPF(str):
 
 class Email(str):
     # apenas para formatar email para lower case com o new
-    def __new__(cls, value: str) -> str:
+    def __new__(cls, value: str) -> "Email":
         return super().__new__(cls, value.lower())

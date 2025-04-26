@@ -13,6 +13,7 @@ from contextos_de_negocio.dominio.comandos.usuario import (
     AtualizarUsuario,
     RemoverUsuario,
 )
+from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
 from contextos_de_negocio.dominio.excecoes import UsuarioNaoEncontrado
 from contextos_de_negocio.pontos_de_entrada.schemas.usuario import (
     CadastrarUsuarioSchema,
@@ -31,8 +32,10 @@ router_usuario = APIRouter(
 
 
 @router_usuario.get("/usuarios", response_model=list[LerUsuarioSchema])
-async def listar(id: UUID4 | None = None, email: str | None = None):
-    unidade_de_trabalho = UnidadeDeTrabalho(usuario=current_user.get())
+async def listar(
+    id: UUID4 | None = None, email: str | None = None
+) -> list[UsuarioEntidade]:
+    unidade_de_trabalho: UnidadeDeTrabalho = UnidadeDeTrabalho(usuario=current_user.get())
 
     usuarios = await listar_usuarios_por_id_e_email(
         unidade_de_trabalho=unidade_de_trabalho, id=id, email=email
@@ -47,7 +50,7 @@ async def listar(id: UUID4 | None = None, email: str | None = None):
 @router_usuario.post("/usuario")
 async def cadastrar(
     novo_usuario: CadastrarUsuarioSchema,
-):
+) -> JSONResponse:
     bus = bootstrap(usuario=current_user.get())
 
     comando = CadastrarUsuario(**novo_usuario.__dict__)
@@ -61,7 +64,7 @@ async def atualizar(
     usuario_atualizado: AtualizarUsuarioSchema,
     id: UUID4 | None = None,
     email: str | None = None,
-):
+) -> JSONResponse:
     bus = bootstrap(usuario=current_user.get())
 
     comando = AtualizarUsuario(**usuario_atualizado.__dict__, id=id, email_antigo=email)
@@ -71,7 +74,7 @@ async def atualizar(
 
 
 @router_usuario.delete("/usuario")
-async def remover(id: UUID4 | None = None, email: str | None = None):
+async def remover(id: UUID4 | None = None, email: str | None = None) -> JSONResponse:
     bus = bootstrap(usuario=current_user.get())
 
     comando = RemoverUsuario(id=id, email=email)

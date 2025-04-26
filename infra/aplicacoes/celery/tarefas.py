@@ -1,13 +1,15 @@
 import asyncio
+from typing import Any
 
 import sentry_sdk
+from celery.local import PromiseProxy
 
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
 from infra.aplicacoes.celery import celery_app
-from libs.ddd.barramento import Evento
+from libs.ddd.barramento import Evento, BarramentoDeMensagens
 
 
-def tarefa_celery(*args, **kwargs):
+def tarefa_celery(*args: dict[str, Any], **kwargs: dict[str, Any]) -> PromiseProxy:
     max_retries = kwargs.pop("max_retries", 1)
 
     kwargs["bind"] = True
@@ -28,17 +30,18 @@ def tarefa_celery(*args, **kwargs):
 
 
 @tarefa_celery()
-def task_tratar_evento_asyncrono(
-    self, evento: Evento, usuario: UsuarioEntidade | None = None
-):
+def task_tratar_evento_asyncrono(  # type: ignore[no-untyped-def]
+    self,
+    evento: Evento,
+    usuario: UsuarioEntidade | None = None,
+) -> None:
     from contextos_de_negocio.barramento import bootstrap
 
-    async def executar(barramento, evento) -> None:
+    async def executar(barramento: BarramentoDeMensagens, evento: Evento) -> None:
         await barramento.handle(evento)
 
     nome = f"Tratando evento asyncrono [{evento.__class__.__name__}]"
 
-    # todo registrar evento rodando
     contexto = sentry_sdk.start_transaction(
         name="Tratando evento asyncrono",
         op="task",

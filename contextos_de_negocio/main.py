@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Any
 
 from fastapi import FastAPI
 
@@ -16,7 +17,7 @@ from infra.banco_de_dados.inicializadores import criar_primeira_empresa_e_usuari
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     await criar_primeira_empresa_e_usuario()
     yield
 
@@ -33,7 +34,7 @@ app = FastAPI(
 
 
 @app.get("/")
-async def test():
+async def test() -> dict[str, str]:
     return {"message": "API está no ar!"}
 
 

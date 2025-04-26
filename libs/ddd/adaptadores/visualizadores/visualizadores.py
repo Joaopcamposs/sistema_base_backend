@@ -11,7 +11,7 @@ class Filtros(dict):
         super().__init__()
         self.update(self.to_query(filtros))
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args: dict[str, Any], **kwargs: dict[str, Any]) -> "Filtros":
         return super().__new__(cls)
 
     @staticmethod

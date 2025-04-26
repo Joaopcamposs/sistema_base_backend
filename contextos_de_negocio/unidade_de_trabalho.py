@@ -58,10 +58,9 @@ class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata, Generic[REPO_ESCRITA, REPO_LE
         if self.view_repo_class:
             self.view_repo = self.view_repo_class(self.session_leitura)
 
-        return await super().__aenter__()
+        return await super().__aenter__()  # type: ignore[return-value]
 
-    async def __aexit__(
+    async def __aexit__(  # type: ignore[override]
         self, *args: tuple[type[Exception], Exception, Exception]
     ) -> None:
-        # Isso tem que ficar no final, após fechar as sessões
         await super().__aexit__(*args)

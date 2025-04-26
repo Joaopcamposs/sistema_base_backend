@@ -1,3 +1,5 @@
+from typing import Callable
+
 from contextos_de_negocio.dominio.comandos.empresa import (
     CadastrarEmpresa,
     AtualizarEmpresa,
@@ -39,7 +41,7 @@ from contextos_de_negocio.servicos.executores.usuario import (
 )
 from libs.ddd.barramento import Evento, Comando
 
-EVENT_HANDLERS: dict[type[Evento], list[callable]] = {
+EVENT_HANDLERS: dict[type[Evento], list[Callable]] = {
     EventoTeste: [evento_teste],
     EventoTesteAssincrono: [evento_teste_assincrono],
     UsuarioCriado: [cadastrar_usuario_publico],
@@ -51,7 +53,7 @@ EVENT_HANDLERS: dict[type[Evento], list[callable]] = {
     ChegouAHoraDeCriarUsuarioInicialDaEmpresa: [cadastrar_usuario],
 }
 
-COMMAND_HANDLERS: dict[type[Comando], callable] = {
+COMMAND_HANDLERS: dict[type[Comando], Callable] = {
     ComandoTeste: comando_teste,
     CadastrarUsuario: cadastrar_usuario,
     AtualizarUsuario: atualizar_usuario,

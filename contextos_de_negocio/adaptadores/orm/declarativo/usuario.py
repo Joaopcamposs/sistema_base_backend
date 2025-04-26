@@ -32,12 +32,12 @@ class UsuarioDB(Base, CamposBaseDB):
         foreign_keys=[empresa_id],
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"UsuarioDB(email={self.email}, id={self.id}, empresa_id={self.empresa_id})"
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)
 
 
@@ -57,8 +57,8 @@ class UsuarioPublicoDB(Base, CamposBaseDB):
     )
     senha_hash: Mapped[str] = mapped_column(String(128), nullable=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"UsuarioPublicoDB(id={self.id}, empresa_id={self.empresa_id})"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)

@@ -17,14 +17,14 @@ DB_NAME = os.getenv("DB_NAME", "postgres")
 EMAIL_PRIMEIRO_USUARIO = os.getenv("EMAIL_PRIMEIRO_USUARIO")
 SENHA_PRIMEIRO_USUARIO = os.getenv("SENHA_PRIMEIRO_USUARIO")
 CPF_PRIMEIRO_USUARIO = os.getenv("CPF_PRIMEIRO_USUARIO")
-AES_KEY = base64.b64decode(os.getenv("AES_KEY").encode())
+AES_KEY = base64.b64decode(os.getenv("AES_KEY", "").encode())
 CHAVE_SECRETA = os.getenv("CHAVE_SECRETA")
 
 NAO_DELETADO: Final[dict] = {"deletado_em": None}
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
+SECRET_KEY = os.getenv("SECRET_KEY", "")
+ALGORITHM = os.getenv("ALGORITHM", "")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", default="30"))
 
 oauth2_scheme = OAuth2PasswordBearer(

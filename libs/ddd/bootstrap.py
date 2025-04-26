@@ -1,6 +1,6 @@
 import functools
 import inspect
-from typing import Any
+from typing import Any, Callable
 
 from libs.ddd.barramento import Comando, Evento, BarramentoDeMensagens, logger
 from libs.ddd.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
@@ -8,10 +8,9 @@ from libs.ddd.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 
 def bootstrap_base(
     uow: UnidadeDeTrabalhoAbstrata,
-    command_handlers: dict[type[Comando], callable],
-    event_handlers: dict[Evento, list[callable]],
+    command_handlers: dict[type[Comando], Callable],
+    event_handlers: dict[Evento, list[Callable]],
     subir_erros_de_eventos: bool = False,
-    erros_de_eventos_para_subir: list[type[Exception]] | None = None,
     permitir_execucoes_assincronas: bool = True,
 ) -> BarramentoDeMensagens:
     dependencies = {"uow": uow, "unidade_de_trabalho": uow}
@@ -32,37 +31,21 @@ def bootstrap_base(
         event_handlers=injected_event_handlers,
         command_handlers=injected_command_handlers,
         subir_erros_de_eventos=subir_erros_de_eventos,
-        erros_de_eventos_para_subir=erros_de_eventos_para_subir,
         permitir_execucoes_assincronas=permitir_execucoes_assincronas,
     )
 
 
-def inject_dependencies(handler: callable, dependencies: dict) -> callable:
+def inject_dependencies(handler: Callable, dependencies: dict) -> Callable:
     params = inspect.signature(handler).parameters
     deps = {
         name: dependency for name, dependency in dependencies.items() if name in params
     }
 
-    if inspect.iscoroutinefunction(handler):
-
-        @functools.wraps(handler)
-        async def async_wrapper(message: Comando | Evento) -> Any:
-            try:
-                return await handler(message, **deps)
-            # except Exception as erro:
-            #     logger.error(f"Error handling async event {message}. Error: {erro}")
-            finally:
-                logger.info(f"Handling async message {message} finished")
-
-        return async_wrapper
-
     @functools.wraps(handler)
-    def sync_wrapper(message: Comando | Evento) -> Any:
+    async def async_wrapper(message: Comando | Evento) -> Any:
         try:
-            return handler(message, **deps)
-        # except Exception as erro:
-        #     logger.error(f"Error handling event {message}. Error: {erro}")
+            return await handler(message, **deps)
         finally:
-            logger.info(f"Handling message {message} finished")
+            logger.info(f"Handling async message {message} finished")
 
-    return sync_wrapper
+    return async_wrapper

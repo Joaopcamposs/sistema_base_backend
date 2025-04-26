@@ -3,6 +3,7 @@ import os
 from abc import ABC
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -33,7 +34,7 @@ class Agregado(CamposBase):
         }
         tipo_para_nao_converter = (str, int, float, bool, dict, list, tuple)
 
-        def _converter_elemento(elemento):
+        def _converter_elemento(elemento: Any) -> Any:
             if hasattr(elemento, "to_dict"):
                 return elemento.to_dict()
             elif isinstance(elemento, list):
@@ -51,7 +52,7 @@ class Agregado(CamposBase):
 
         return dados_convertidos
 
-    def add_event(self, event: "Evento"):  # noqa: F821
+    def add_event(self, event: "Evento") -> None:  # noqa: F821
         from libs.ddd.barramento import Evento
 
         assert issubclass(type(event), Evento)
@@ -63,9 +64,9 @@ class Agregado(CamposBase):
 class SegurancaDoUsuario:
     def verificar_senha(self, senha: str) -> bool:
         if getattr(self, "senha_hash", None):
-            senha_hash = self.senha_hash  # noqa: F821
+            senha_hash = self.senha_hash  # type: ignore[attr-defined]
         else:
-            senha_hash = self._senha_hash  # noqa: F821
+            senha_hash = self._senha_hash  # type: ignore[attr-defined]
 
         senhas_conferem = pwd_context.verify(secret=senha, hash=senha_hash)
         return senhas_conferem

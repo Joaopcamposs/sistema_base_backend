@@ -3,7 +3,7 @@ from contextos_de_negocio.dominio.eventos.teste import EventoTeste, EventoTesteA
 from contextos_de_negocio.unidade_de_trabalho import UnidadeDeTrabalho
 
 
-async def comando_teste(comando: ComandoTeste, uow: UnidadeDeTrabalho) -> None:
+async def comando_teste(comando: ComandoTeste, uow: UnidadeDeTrabalho) -> str:
     """
     Comando de teste.
 
@@ -14,6 +14,7 @@ async def comando_teste(comando: ComandoTeste, uow: UnidadeDeTrabalho) -> None:
     uow.adicionar_evento_fora_de_agregado(
         EventoTesteAssincrono(mensagem="evento printado assincrono")
     )
+    return "comando printado com sucesso!"
 
 
 async def evento_teste(evento: EventoTeste, uow: UnidadeDeTrabalho) -> None:
