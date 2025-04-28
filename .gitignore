@@ -6,3 +6,5 @@ __pycache__
 app/__pycache__
 tests/.pytest_cache
 tests/__pycache__
+
+libs/barramento_de_mensagens-*-py3-none-any.whl

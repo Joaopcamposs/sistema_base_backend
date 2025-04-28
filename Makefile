@@ -26,3 +26,6 @@ poetry-install:
 
 poetry-activate:
 	poetry env activate
+
+install-barramento-local:
+	poetry add libs/barramento_de_mensagens-0.1.1-py3-none-any.whl

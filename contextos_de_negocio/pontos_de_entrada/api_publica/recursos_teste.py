@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from fastapi import APIRouter
 from starlette.responses import JSONResponse
 
@@ -21,4 +23,4 @@ async def comando_teste_api(
     comando = ComandoTeste(mensagem)
     retorno = await bus.handle(comando)
 
-    return JSONResponse(status_code=201, content=str(retorno))
+    return JSONResponse(status_code=HTTPStatus.OK, content=str(retorno))

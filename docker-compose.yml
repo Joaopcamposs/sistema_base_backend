@@ -16,7 +16,7 @@ services:
     build:
       context: .
     container_name: celery_worker
-    command: celery -A infra.aplicacoes.celery.worker worker --loglevel=info
+    command: celery -A infra.aplicacoes.celery worker --loglevel=info
     depends_on:
       - redis
       - api

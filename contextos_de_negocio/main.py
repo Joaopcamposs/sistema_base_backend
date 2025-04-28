@@ -13,12 +13,16 @@ from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_teste import ro
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_usuario import (
     router_usuario,
 )
-from infra.banco_de_dados.inicializadores import criar_primeira_empresa_e_usuario
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
+    from infra.banco_de_dados.inicializadores import criar_primeira_empresa_e_usuario
+    from barramento_de_mensagens.aplicacoes.celery import configurar_celery_app
+    from infra.aplicacoes.celery import celery_app
+
     await criar_primeira_empresa_e_usuario()
+    configurar_celery_app(celery_app)
     yield
 
 

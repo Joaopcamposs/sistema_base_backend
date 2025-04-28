@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11.9-slim
 
 # Cria diretório da app
 WORKDIR /sistema_base_backend
@@ -14,17 +14,14 @@ ENV PATH="/root/.local/bin:$PATH"
 # Define o Poetry para criar o virtualenv dentro do projeto
 RUN poetry config virtualenvs.in-project true
 
-# Copia arquivos de dependência primeiro (melhora cache)
-COPY pyproject.toml ./
+# Copia a aplicação
+COPY . .
 
 # Instala dependências
 RUN poetry lock && poetry install --no-root
 
 # Adiciona o .venv/bin ao PATH do container
 ENV PATH="/sistema_base_backend/.venv/bin:$PATH"
-
-# Copia o restante da aplicação
-COPY . .
 
 # Comando padrão
 CMD ["uvicorn", "contextos_de_negocio.main:app", "--host", "0.0.0.0", "--port", "8000"]

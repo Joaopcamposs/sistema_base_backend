@@ -1,2 +1,2 @@
 # noinspection PyUnresolvedReferences
-from barramento_de_mensagens.aplicacoes.celery import task_tratar_evento_asyncrono
+from barramento_de_mensagens.aplicacoes.tarefas import task_tratar_evento_asyncrono
