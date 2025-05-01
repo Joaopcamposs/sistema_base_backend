@@ -34,7 +34,7 @@ class CPF(str):
 
 class CNPJ(str):
     # apenas para formatar cnpj com digitos
-    def __new__(cls, value: str | None) -> CNPJ | None:
+    def __new__(cls, value: str | None) -> CNPJ | None:  # type: ignore[misc]
         if not value:
             return None
         if isinstance(value, str):
@@ -48,7 +48,7 @@ class CNPJ(str):
 
 class Email(str):
     # apenas para formatar email para lower case com o new
-    def __new__(cls, value: str) -> Email | None:
+    def __new__(cls, value: str) -> Email | None:  # type: ignore[misc]
         if isinstance(value, str):
             return super().__new__(cls, value.lower())
         return None

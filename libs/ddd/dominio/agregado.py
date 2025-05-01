@@ -1,6 +1,6 @@
 import hashlib
 import os
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
@@ -58,18 +58,6 @@ class Agregado(CamposBase):
         assert issubclass(type(event), Evento)
         self.eventos = getattr(self, "eventos", [])
         self.eventos.append(event)
-
-    @abstractmethod
-    def cadastrar(self, *args: dict[str, Any], **kwargs: dict[str, Any]) -> None:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def atualizar(self, *args: dict[str, Any], **kwargs: dict[str, Any]) -> None:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def remover(self, *args: dict[str, Any], **kwargs: dict[str, Any]) -> None:
-        raise NotImplementedError()
 
 
 @dataclass
