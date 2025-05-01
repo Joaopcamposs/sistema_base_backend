@@ -18,7 +18,7 @@ class UsuarioDB(Base, CamposBaseDB):
         String(255), nullable=False, unique=True, index=True
     )
     cpf: Mapped[str] = mapped_column(String(11), nullable=False, unique=True, index=True)
-    senha: Mapped[str] = mapped_column(String(255), nullable=False)
+    senha_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     ativo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     adm: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     permissoes: Mapped[list[str]] = mapped_column(

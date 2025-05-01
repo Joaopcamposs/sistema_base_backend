@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from uuid import UUID
 
 from libs.ddd.dominio.agregado import CamposBase, SegurancaDoUsuario
+from libs.utils.tipos_basicos import Email, CPF
 
 
 @dataclass(kw_only=True)
@@ -11,8 +12,8 @@ class UsuarioEntidade(CamposBase, SegurancaDoUsuario):
     id: UUID
     empresa: UUID
     nome: str
-    email: str
-    cpf: str
+    email: Email
+    cpf: CPF
     ativo: bool
     adm: bool
     permissoes: list[str] = field(default_factory=list)

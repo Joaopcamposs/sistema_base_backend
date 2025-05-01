@@ -20,11 +20,14 @@ class AtualizarUsuarioSchema(BaseModel):
     senha: str
     adm: bool
     ativo: bool
+    permissoes: list[str] | None = None
 
 
 class LerUsuarioSchema(BaseModel):
     id: UUID4
     nome: str
     email: str
+    cpf: str
     adm: bool
     ativo: bool
+    permissoes: list[str] | None = None

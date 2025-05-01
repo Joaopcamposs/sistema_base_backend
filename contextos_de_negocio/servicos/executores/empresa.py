@@ -58,7 +58,7 @@ async def atualizar_empresa(
         filtros = Filtros(
             {
                 "id": comando.id,
-                "email": Email(comando.email_antigo) if comando.email_antigo else None,
+                "email": Email(comando.email_antigo),
             }
         )
         empresa = await repo_dominio.consultar_um_por_filtros(filtros=filtros)
@@ -92,7 +92,7 @@ async def remover_empresa(
         filtros = Filtros(
             {
                 "id": comando.id,
-                "email": Email(comando.email) if comando.email else None,
+                "email": Email(comando.email),
             }
         )
         empresa = await repo_dominio.consultar_um_por_filtros(filtros=filtros)

@@ -30,5 +30,4 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", defau
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="api/token",
-    scopes={"me": "Read information about the current user.", "items": "Read items."},
 )

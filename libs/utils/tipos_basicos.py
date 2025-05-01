@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from validate_docbr import CPF as ValidadorDeCPF
 
@@ -30,7 +32,23 @@ class CPF(str):
         return self.cpf
 
 
+class CNPJ(str):
+    # apenas para formatar cnpj com digitos
+    def __new__(cls, value: str | None) -> CNPJ | None:
+        if not value:
+            return None
+        if isinstance(value, str):
+            value = cls.somente_digitos(value)
+        return super().__new__(cls, value)
+
+    @staticmethod
+    def somente_digitos(cnpj: str) -> str:
+        return "".join([char for char in cnpj if char.isdigit()])
+
+
 class Email(str):
     # apenas para formatar email para lower case com o new
-    def __new__(cls, value: str) -> "Email":
-        return super().__new__(cls, value.lower())
+    def __new__(cls, value: str) -> Email | None:
+        if isinstance(value, str):
+            return super().__new__(cls, value.lower())
+        return None

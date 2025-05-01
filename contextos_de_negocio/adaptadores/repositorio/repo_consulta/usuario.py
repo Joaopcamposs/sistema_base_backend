@@ -11,6 +11,7 @@ from contextos_de_negocio.dominio.entidades.usuario import (
 from libs.ddd.adaptadores.repositorio.repositorio import RepositorioConsulta
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
 from libs.utils.constantes import NAO_DELETADO
+from libs.utils.tipos_basicos import Email, CPF
 
 
 class UsuarioRepoConsulta(RepositorioConsulta):
@@ -38,15 +39,7 @@ class UsuarioRepoConsulta(RepositorioConsulta):
                 email_hash=usuario.email_hash,
                 _senha_hash=usuario.senha_hash,
             )
-
-        if (
-            UsuarioPublicoEntidade.descriptografar_email(
-                usuario_entidade.email_criptografado
-            )
-            == email
-        ):
             return usuario_entidade
-        return None
 
     async def consultar_um_por_email(self, email: str) -> UsuarioEntidade | None:
         async with self.session as session:
@@ -64,11 +57,11 @@ class UsuarioRepoConsulta(RepositorioConsulta):
                 id=usuario.id,
                 empresa=usuario.empresa_id,
                 nome=usuario.nome,
-                email=usuario.email,
-                cpf=usuario.cpf,
+                email=Email(usuario.email),
+                cpf=CPF(usuario.cpf),
                 adm=usuario.adm,
                 ativo=usuario.ativo,
-                _senha_hash=usuario.senha,
+                _senha_hash=usuario.senha_hash,
             )
 
         return usuario_entidade
@@ -87,11 +80,11 @@ class UsuarioRepoConsulta(RepositorioConsulta):
                 id=usuario.id,
                 empresa=usuario.empresa_id,
                 nome=usuario.nome,
-                email=usuario.email,
-                cpf=usuario.cpf,
+                email=Email(usuario.email),
+                cpf=CPF(usuario.cpf),
                 adm=usuario.adm,
                 ativo=usuario.ativo,
-                _senha_hash=usuario.senha,
+                _senha_hash=usuario.senha_hash,
             )
 
         return usuario_entidade
@@ -113,11 +106,11 @@ class UsuarioRepoConsulta(RepositorioConsulta):
                     id=usuario.id,
                     empresa=usuario.empresa_id,
                     nome=usuario.nome,
-                    email=usuario.email,
-                    cpf=usuario.cpf,
+                    email=Email(usuario.email),
+                    cpf=CPF(usuario.cpf),
                     adm=usuario.adm,
                     ativo=usuario.ativo,
-                    _senha_hash=usuario.senha,
+                    _senha_hash=usuario.senha_hash,
                 )
                 for usuario in usuarios
             ]

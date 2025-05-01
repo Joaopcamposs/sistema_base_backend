@@ -42,6 +42,8 @@ from contextos_de_negocio.servicos.executores.usuario import (
     atualizar_usuario,
     cadastrar_usuario,
     cadastrar_usuario_publico,
+    atualizar_usuario_publico,
+    remover_usuario_publico,
 )
 
 EVENT_HANDLERS: ManipuladoresDeEventos = ManipuladoresDeEventos(
@@ -49,8 +51,8 @@ EVENT_HANDLERS: ManipuladoresDeEventos = ManipuladoresDeEventos(
         EventoTeste: [evento_teste],
         EventoTesteAssincrono: [evento_teste_assincrono],
         UsuarioCriado: [cadastrar_usuario_publico],
-        UsuarioAtualizado: [],
-        UsuarioRemovido: [],
+        UsuarioAtualizado: [atualizar_usuario_publico],
+        UsuarioRemovido: [remover_usuario_publico],
         EmpresaCriada: [],
         EmpresaAtualizada: [],
         EmpresaRemovida: [],

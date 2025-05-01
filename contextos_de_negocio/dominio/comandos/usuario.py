@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from pydantic import UUID4
 from barramento_de_mensagens.base.barramento import Comando
@@ -13,7 +13,7 @@ class CadastrarUsuario(Comando):
     senha: str
     ativo: bool
     adm: bool
-    empresa: UUID4 = uuid4()
+    empresa: UUID4
     permissoes: list[str] = field(default_factory=list)
 
 

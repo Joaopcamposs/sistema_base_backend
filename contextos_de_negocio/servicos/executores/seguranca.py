@@ -64,8 +64,7 @@ async def get_current_user(
         empresa = payload.get("empresa_id")
         if email is None:
             raise credentials_exception
-        token_scopes = payload.get("scopes", [])
-        token_data = TokenData(scopes=token_scopes, username=email)
+        token_data = TokenData(username=email)
     except (InvalidTokenError, ValidationError):
         raise credentials_exception
 

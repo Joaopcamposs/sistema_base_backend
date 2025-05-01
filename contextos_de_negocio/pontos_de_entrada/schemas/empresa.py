@@ -9,7 +9,7 @@ class CadastrarEmpresaSchema(BaseModel):
     nome_responsavel: str
     email: str
     senha: str
-    cpf: str | None = None
+    cpf: str
     cnpj: str | None = None
     ativo: bool
     deve_criar_usuario: bool = False
@@ -21,7 +21,7 @@ class AtualizarEmpresaSchema(BaseModel):
     nome_fantasia: str | None = None
     nome_responsavel: str
     email: str
-    cpf: str | None = None
+    cpf: str
     cnpj: str | None = None
     ativo: bool
 
@@ -32,6 +32,6 @@ class LerEmpresaSchema(BaseModel):
     nome_fantasia: str | None = None
     nome_responsavel: str
     email: str
-    cpf: str | None = None
+    cpf: str
     cnpj: str | None = None
     ativo: bool

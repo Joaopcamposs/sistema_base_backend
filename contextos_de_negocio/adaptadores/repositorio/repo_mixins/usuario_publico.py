@@ -1,6 +1,6 @@
 from abc import ABC
 
-from sqlalchemy import insert, update
+from sqlalchemy import insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from contextos_de_negocio.adaptadores.orm.declarativo.usuario import UsuarioPublicoDB
@@ -43,5 +43,24 @@ class UsuarioPublicoMixin(ABC):
                 raise ValueError(
                     "Tipo de operação não suportado para o repositório de domínio."
                 )
+
+        await self.session.execute(operacao)
+
+    async def remover_usuario_publico(self, usuario: UsuarioPublico) -> None:
+        if usuario._usa_soft_delete:
+            dados = {
+                "modificado_por": usuario.modificado_por,
+                "ultima_modificacao_em": usuario.ultima_modificacao_em,
+                "deletado_por": usuario.deletado_por,
+                "deletado_em": usuario.deletado_em,
+            }
+
+            operacao = (
+                update(UsuarioPublicoDB)
+                .where(UsuarioPublicoDB.id == usuario.id)
+                .values(dados)
+            )
+        else:
+            operacao = delete(UsuarioPublicoDB).where(UsuarioPublicoDB.id == usuario.id)
 
         await self.session.execute(operacao)

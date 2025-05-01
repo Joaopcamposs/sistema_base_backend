@@ -3,6 +3,8 @@ from uuid import UUID
 
 from barramento_de_mensagens.base.barramento import Comando
 
+from libs.utils.tipos_basicos import CPF, Email, CNPJ
+
 
 @dataclass
 class CadastrarEmpresa(Comando):
@@ -14,11 +16,11 @@ class CadastrarEmpresa(Comando):
     razao_social: str
     nome_responsavel: str
     ativo: bool
-    cpf: str
-    email: str
+    cpf: CPF
+    email: Email
     senha: str
     id: UUID
-    cnpj: str | None = None
+    cnpj: CNPJ | None = None
     nome_fantasia: str | None = None
     deve_criar_usuario: bool = True
     _eh_primeira_empresa: bool = False
@@ -27,12 +29,12 @@ class CadastrarEmpresa(Comando):
 @dataclass
 class AtualizarEmpresa(Comando):
     nome_responsavel: str
-    email: str
+    email: Email
     ativo: bool
     razao_social: str
-    cpf: str
+    cpf: CPF
     nome_fantasia: str | None = None
-    cnpj: str | None = None
+    cnpj: CNPJ | None = None
     # campos de busca
     id: UUID | None = None
     email_antigo: str | None = None
@@ -41,4 +43,4 @@ class AtualizarEmpresa(Comando):
 @dataclass
 class RemoverEmpresa(Comando):
     id: UUID | None = None
-    email: str | None = None
+    email: Email | None = None

@@ -25,6 +25,7 @@ from contextos_de_negocio.servicos.executores.seguranca import (
 )
 from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.utils.constantes import CHAVE_SECRETA
+from libs.utils.tipos_basicos import CPF, Email, CNPJ
 
 router_empresa = APIRouter(
     prefix="/api/v1", tags=["Empresas"], dependencies=[Depends(get_current_user)]
@@ -64,10 +65,10 @@ async def cadastrar(
         razao_social=novo_empresa.razao_social,
         nome_responsavel=novo_empresa.nome_responsavel,
         ativo=novo_empresa.ativo,
-        cpf=novo_empresa.cpf,
-        email=novo_empresa.email,
+        cpf=CPF(novo_empresa.cpf),
+        email=Email(novo_empresa.email),
         senha=novo_empresa.senha,
-        cnpj=novo_empresa.cnpj,
+        cnpj=CNPJ(novo_empresa.cnpj),
         nome_fantasia=novo_empresa.nome_fantasia,
         id=id_empresa,
         deve_criar_usuario=novo_empresa.deve_criar_usuario,

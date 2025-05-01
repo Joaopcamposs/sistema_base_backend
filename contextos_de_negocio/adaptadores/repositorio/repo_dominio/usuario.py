@@ -3,11 +3,14 @@ from uuid import UUID
 
 from sqlalchemy import select, insert, update, delete
 
-from contextos_de_negocio.adaptadores.orm.declarativo.usuario import UsuarioDB
+from contextos_de_negocio.adaptadores.orm.declarativo.usuario import (
+    UsuarioDB,
+    UsuarioPublicoDB,
+)
 from contextos_de_negocio.adaptadores.repositorio.repo_mixins.usuario_publico import (
     UsuarioPublicoMixin,
 )
-from contextos_de_negocio.dominio.agregados.usuario import Usuario
+from contextos_de_negocio.dominio.agregados.usuario import Usuario, UsuarioPublico
 from contextos_de_negocio.dominio.excecoes import (
     UsuarioNaoEncontrado,
     UsuarioJaCadastrado,
@@ -15,7 +18,7 @@ from contextos_de_negocio.dominio.excecoes import (
 from libs.ddd.adaptadores.repositorio.repositorio import RepositorioDominio
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
 from libs.utils.constantes import NAO_DELETADO
-from libs.utils.tipos_basicos import Email, TipoDeOperacao
+from libs.utils.tipos_basicos import Email, TipoDeOperacao, CPF
 
 
 class UsuarioRepoDominioAbstrato(RepositorioDominio):
@@ -69,8 +72,8 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato, UsuarioPublicoMixin):
         return Usuario.retornar_agregado_para_cadastro(
             empresa=empresa,
             nome=nome,
-            email=email,
-            cpf=cpf,
+            email=Email(email),
+            cpf=CPF(cpf),
             senha=senha,
             ativo=ativo,
             adm=adm,
@@ -91,11 +94,11 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato, UsuarioPublicoMixin):
                 id=usuario.id,
                 empresa=usuario.empresa_id,
                 nome=usuario.nome,
-                email=usuario.email,
-                cpf=usuario.cpf,
+                email=Email(usuario.email),
+                cpf=CPF(usuario.cpf),
                 adm=usuario.adm,
                 ativo=usuario.ativo,
-                senha_hash=usuario.senha,
+                senha_hash=usuario.senha_hash,
                 permissoes=usuario.permissoes,
                 criado_por=usuario.criado_por,
                 criado_em=usuario.criado_em,
@@ -107,6 +110,35 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato, UsuarioPublicoMixin):
 
         return agregado
 
+    async def consultar_usuario_publico_por_id(self, id: UUID) -> UsuarioPublico:
+        async with self.session as session:
+            usuario = (
+                await session.execute(
+                    select(UsuarioPublicoDB).where(
+                        UsuarioPublicoDB.id == id,
+                        UsuarioPublicoDB.deletado_em.is_(None),
+                    )
+                )
+            ).scalar_one_or_none()
+            if not usuario:
+                raise UsuarioNaoEncontrado
+
+            usuario_entidade = UsuarioPublico(
+                id=usuario.id,
+                empresa=usuario.empresa_id,
+                ativo=usuario.ativo,
+                email_criptografado=usuario.email_criptografado,
+                email_hash=usuario.email_hash,
+                senha_hash=usuario.senha_hash,
+                criado_por=usuario.criado_por,
+                criado_em=usuario.criado_em,
+                ultima_modificacao_em=usuario.ultima_modificacao_em,
+                modificado_por=usuario.modificado_por,
+                deletado_em=usuario.deletado_em,
+                deletado_por=usuario.deletado_por,
+            )
+            return usuario_entidade
+
     async def _adicionar(
         self,
         usuario: Usuario,
@@ -117,7 +149,7 @@ class UsuarioRepoDominio(UsuarioRepoDominioAbstrato, UsuarioPublicoMixin):
             "nome": usuario.nome,
             "email": usuario.email,
             "cpf": usuario.cpf,
-            "senha": usuario.senha_hash,
+            "senha_hash": usuario.senha_hash,
             "adm": usuario.adm,
             "ativo": usuario.ativo,
             "permissoes": usuario.permissoes,

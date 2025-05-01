@@ -13,7 +13,7 @@ from contextos_de_negocio.dominio.excecoes import (
 from libs.ddd.adaptadores.repositorio.repositorio import RepositorioDominio
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
 from libs.utils.constantes import NAO_DELETADO
-from libs.utils.tipos_basicos import Email, TipoDeOperacao
+from libs.utils.tipos_basicos import Email, TipoDeOperacao, CPF, CNPJ
 
 
 class EmpresaRepoDominioAbstrato(RepositorioDominio):
@@ -47,9 +47,9 @@ class EmpresaRepoDominio(EmpresaRepoDominioAbstrato):
         razao_social: str,
         nome_fantasia: str,
         nome_responsavel: str,
-        email: str,
-        cpf: str,
-        cnpj: str,
+        email: Email,
+        cpf: CPF,
+        cnpj: CNPJ,
         ativo: bool,
         id: UUID | None = None,
         _eh_primeira_empresa: bool = False,
@@ -91,9 +91,9 @@ class EmpresaRepoDominio(EmpresaRepoDominioAbstrato):
                 razao_social=empresa.razao_social,
                 nome_fantasia=empresa.nome_fantasia,
                 nome_responsavel=empresa.nome_responsavel,
-                email=empresa.email,
-                cpf=empresa.cpf,
-                cnpj=empresa.cnpj,
+                email=Email(empresa.email),
+                cpf=CPF(empresa.cpf),
+                cnpj=CNPJ(empresa.cnpj),
                 ativo=empresa.ativo,
                 id=empresa.id,
                 criado_por=empresa.criado_por,

@@ -1,14 +1,20 @@
 from datetime import datetime
-from sqlalchemy import UUID, ForeignKey, DateTime
+from sqlalchemy import UUID, DateTime
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column
 
 Base = declarative_base()
 
 
 class CamposBaseDB:
-    criado_por: Mapped[UUID] = mapped_column(UUID, nullable=True)
-    criado_em: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    ultima_modificacao_em: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    modificado_por: Mapped[UUID] = mapped_column(UUID, nullable=True)
-    deletado_em: Mapped[datetime] = mapped_column(DateTime, nullable=True, default=False)
-    deletado_por: Mapped[UUID] = mapped_column(UUID, nullable=True)
+    criado_por: Mapped[UUID | None] = mapped_column(UUID, nullable=True, default=None)
+    criado_em: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True, default=None
+    )
+    ultima_modificacao_em: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True, default=None
+    )
+    modificado_por: Mapped[UUID | None] = mapped_column(UUID, nullable=True, default=None)
+    deletado_em: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True, default=None
+    )
+    deletado_por: Mapped[UUID | None] = mapped_column(UUID, nullable=True, default=None)

@@ -16,7 +16,7 @@ async def listar_usuarios_por_id_e_email(
     filtros = Filtros(
         {
             "id": id,
-            "email": Email(email) if email else None,
+            "email": Email(email),
         }
     )
 

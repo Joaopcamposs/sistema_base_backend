@@ -7,6 +7,7 @@ from contextos_de_negocio.dominio.entidades.empresa import EmpresaEntidade
 from libs.ddd.adaptadores.repositorio.repositorio import RepositorioConsulta
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
 from libs.utils.constantes import NAO_DELETADO
+from libs.utils.tipos_basicos import Email, CPF, CNPJ
 
 
 class EmpresaRepoConsulta(RepositorioConsulta):
@@ -26,9 +27,9 @@ class EmpresaRepoConsulta(RepositorioConsulta):
                 razao_social=empresa.razao_social,
                 nome_fantasia=empresa.nome_fantasia,
                 nome_responsavel=empresa.nome_responsavel,
-                email=empresa.email,
-                cpf=empresa.cpf,
-                cnpj=empresa.cnpj,
+                email=Email(empresa.email),
+                cpf=CPF(empresa.cpf),
+                cnpj=CNPJ(empresa.cnpj),
                 ativo=empresa.ativo,
                 id=empresa.id,
             )
@@ -49,9 +50,9 @@ class EmpresaRepoConsulta(RepositorioConsulta):
                 razao_social=empresa.razao_social,
                 nome_fantasia=empresa.nome_fantasia,
                 nome_responsavel=empresa.nome_responsavel,
-                email=empresa.email,
-                cpf=empresa.cpf,
-                cnpj=empresa.cnpj,
+                email=Email(empresa.email),
+                cpf=CPF(empresa.cpf),
+                cnpj=CNPJ(empresa.cnpj),
                 ativo=empresa.ativo,
                 id=empresa.id,
             )
@@ -75,9 +76,9 @@ class EmpresaRepoConsulta(RepositorioConsulta):
                     razao_social=empresa.razao_social,
                     nome_fantasia=empresa.nome_fantasia,
                     nome_responsavel=empresa.nome_responsavel,
-                    email=empresa.email,
-                    cpf=empresa.cpf,
-                    cnpj=empresa.cnpj,
+                    email=Email(empresa.email),
+                    cpf=CPF(empresa.cpf),
+                    cnpj=CNPJ(empresa.cnpj),
                     ativo=empresa.ativo,
                     id=empresa.id,
                 )

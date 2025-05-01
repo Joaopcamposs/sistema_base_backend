@@ -10,6 +10,8 @@ from contextos_de_negocio.dominio.eventos.usuario import (
     UsuarioCriado,
     ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
     ChegouAHoraDeCriarUsuarioADMDaEmpresa,
+    UsuarioAtualizado,
+    UsuarioRemovido,
 )
 from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
@@ -125,6 +127,59 @@ async def cadastrar_usuario_publico(
         usuario_publico = UsuarioPublico.retornar_agregado_para_cadastro(usuario=usuario)
 
         await repo_dominio.adicionar_usuario_publico(
+            usuario=usuario_publico,
+        )
+        await uow.commit()
+
+    return usuario_publico.id
+
+
+async def atualizar_usuario_publico(
+    evento: UsuarioAtualizado, unidade_de_trabalho: UnidadeDeTrabalho
+) -> UUID:
+    from contextos_de_negocio import Dominio, UsuarioRepoDominio, UsuarioRepoConsulta
+
+    async with unidade_de_trabalho(Dominio.usuario) as uow:
+        repo_dominio: UsuarioRepoDominio = uow.domain_repo
+        repo_consulta: UsuarioRepoConsulta = uow.view_repo
+
+        filtros = Filtros(
+            {
+                "id": evento.id,
+            }
+        )
+        usuario_privado = await repo_consulta.consultar_um_por_filtros(filtros=filtros)
+
+        usuario_publico = await repo_dominio.consultar_usuario_publico_por_id(
+            id=evento.id
+        )
+        usuario_publico.atualizar(
+            usuario_privado=usuario_privado,
+            usuario=uow.usuario,
+        )
+
+        await repo_dominio.adicionar_usuario_publico(
+            usuario=usuario_publico,
+        )
+        await uow.commit()
+
+    return usuario_publico.id
+
+
+async def remover_usuario_publico(
+    evento: UsuarioRemovido, unidade_de_trabalho: UnidadeDeTrabalho
+) -> UUID:
+    from contextos_de_negocio import Dominio, UsuarioRepoDominio
+
+    async with unidade_de_trabalho(Dominio.usuario) as uow:
+        repo_dominio: UsuarioRepoDominio = uow.domain_repo
+
+        usuario_publico = await repo_dominio.consultar_usuario_publico_por_id(
+            id=evento.id
+        )
+        usuario_publico.remover(usuario=uow.usuario)
+
+        await repo_dominio.remover_usuario_publico(
             usuario=usuario_publico,
         )
         await uow.commit()

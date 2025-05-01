@@ -7,7 +7,7 @@ from contextos_de_negocio.dominio.eventos.usuario import (
     UsuarioAtualizado,
     UsuarioRemovido,
 )
-from libs.utils.tipos_basicos import Email, TipoDeOperacao
+from libs.utils.tipos_basicos import Email, TipoDeOperacao, CPF
 from libs.ddd.dominio.agregado import Agregado, SegurancaDoUsuario
 
 
@@ -16,8 +16,8 @@ class Usuario(Agregado, SegurancaDoUsuario):
     id: UUID
     empresa: UUID
     nome: str
-    email: str
-    cpf: str
+    email: Email
+    cpf: CPF
     senha_hash: str
     ativo: bool
     adm: bool
@@ -34,8 +34,8 @@ class Usuario(Agregado, SegurancaDoUsuario):
         cls,
         empresa: UUID,
         nome: str,
-        email: str,
-        cpf: str,
+        email: Email,
+        cpf: CPF,
         senha: str,
         ativo: bool,
         adm: bool,
@@ -43,6 +43,7 @@ class Usuario(Agregado, SegurancaDoUsuario):
     ) -> "Usuario":
         senha = cls.criptografar_senha(senha)
         email = Email(email)
+        cpf = CPF(cpf)
         return Usuario(
             empresa=empresa,
             nome=nome,
@@ -57,7 +58,7 @@ class Usuario(Agregado, SegurancaDoUsuario):
         )
 
     def cadastrar(self, usuario: UsuarioEntidade) -> None:
-        self.criado_por = None  # nao registraremos o usuario que criou
+        self.criado_por = usuario.id
         self.criado_em = datetime.now()
 
         self.add_event(UsuarioCriado(id=self.id))
@@ -65,8 +66,8 @@ class Usuario(Agregado, SegurancaDoUsuario):
     def atualizar(
         self,
         nome: str,
-        email: str,
-        cpf: str,
+        email: Email,
+        cpf: CPF,
         senha: str,
         adm: bool,
         ativo: bool,
@@ -77,7 +78,7 @@ class Usuario(Agregado, SegurancaDoUsuario):
 
         self.nome = nome
         self.email = Email(email)
-        self.cpf = cpf  # todo desativado temporariamente
+        self.cpf = CPF(cpf)
         self.senha_hash = self.criptografar_senha(senha)
         self.ativo = ativo
         self.adm = adm
@@ -132,5 +133,31 @@ class UsuarioPublico(Agregado, SegurancaDoUsuario):
             ativo=usuario.ativo,
             criado_em=usuario.criado_em,
             criado_por=usuario.criado_por,
-            _tipo_de_operacao=TipoDeOperacao.INSERCAO,
         )
+
+    def cadastrar(self, usuario: UsuarioEntidade) -> None:
+        self._tipo_de_operacao = TipoDeOperacao.INSERCAO
+        self.criado_por = usuario.id
+        self.criado_em = datetime.now()
+
+    def atualizar(
+        self, usuario_privado: UsuarioEntidade, usuario: UsuarioEntidade
+    ) -> None:
+        self._tipo_de_operacao = TipoDeOperacao.ATUALIZACAO
+
+        self.email_criptografado = self.criptografar_email(usuario_privado.email)
+        self.email_hash = self.hash_email(usuario_privado.email)
+        self.senha_hash = usuario_privado._senha_hash
+        self.ativo = usuario_privado.ativo
+
+        self.modificado_por = usuario.id
+        self.ultima_modificacao_em = datetime.now()
+
+    def remover(self, usuario: UsuarioEntidade) -> None:
+        self._tipo_de_operacao = TipoDeOperacao.REMOCAO
+
+        self.modificado_por = usuario.id
+        self.ultima_modificacao_em = datetime.now()
+
+        self.deletado_por = usuario.id
+        self.deletado_em = datetime.now()
