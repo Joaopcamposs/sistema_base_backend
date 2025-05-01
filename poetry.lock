@@ -145,14 +145,14 @@ testing = ["jaraco.test", "pytest (!=8.0.*)", "pytest (>=6,!=8.1.*)", "pytest-ch
 
 [[package]]
 name = "barramento-de-mensagens"
-version = "0.1.0"
+version = "0.1.2"
 description = "Biblioteca para barramento de mensagens"
 optional = false
 python-versions = ">=3.11.0"
 groups = ["main"]
 files = [
-    {file = "barramento_de_mensagens-0.1.0-py3-none-any.whl", hash = "sha256:e979dcb764b41132d64c39d677eccb42541ab6fc94378d9ea8dbc87183786602"},
-    {file = "barramento_de_mensagens-0.1.0.tar.gz", hash = "sha256:ebc5ffb8f775734363a055353c9c5fa0d0eafcfeaa2afb8d7f6fedd6601eddd2"},
+    {file = "barramento_de_mensagens-0.1.2-py3-none-any.whl", hash = "sha256:23c3044ddf509a416960527255cc7616c95e44189f4e0af532f9d8a181df7170"},
+    {file = "barramento_de_mensagens-0.1.2.tar.gz", hash = "sha256:11bcad0607eeccd5149d74375aef3567b794865c45c37dc511f1e66540641165"},
 ]
 
 [package.dependencies]
@@ -2958,4 +2958,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "ac21d8b10f564a6effa7976e2ede24e9875766cc95bc48905ffa5b7da2fb2e4a"
+content-hash = "c345401e67ded4f7426f0470c8ec05f0ea91469805787a8d5755c6e9368c74f2"
