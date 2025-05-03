@@ -125,6 +125,9 @@ async def cadastrar_usuario_publico(
         usuario = await repo_dominio.consultar_um_por_filtros(filtros=filtros)
 
         usuario_publico = UsuarioPublico.retornar_agregado_para_cadastro(usuario=usuario)
+        usuario_publico.cadastrar(
+            usuario=uow.usuario,
+        )
 
         await repo_dominio.adicionar_usuario_publico(
             usuario=usuario_publico,

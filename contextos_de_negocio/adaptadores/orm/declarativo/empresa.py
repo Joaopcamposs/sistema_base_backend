@@ -29,7 +29,7 @@ class EmpresaDB(Base, CamposBaseDB):
     ativo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     # relacoes
-    usuarios = relationship(
+    usuarios: Mapped[list["UsuarioDB"]] = relationship(  # type: ignore
         "UsuarioDB",
         back_populates="empresa",
         foreign_keys="[UsuarioDB.empresa_id]",

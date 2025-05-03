@@ -82,7 +82,7 @@ class Empresa(Agregado):
                 empresa=self.id,
             )
         )
-        if self._eh_primeira_empresa is True:
+        if self._eh_primeira_empresa is False:
             email_usuario_adm_da_empresa = Email(
                 f"{PREFIXO_USUARIO_ADM}@{str(self.id)}.com"
             )

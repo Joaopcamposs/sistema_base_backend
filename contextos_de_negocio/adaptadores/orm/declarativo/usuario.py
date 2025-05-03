@@ -26,7 +26,7 @@ class UsuarioDB(Base, CamposBaseDB):
     )
 
     # relacoes
-    empresa = relationship(
+    empresa: Mapped["EmpresaDB"] = relationship(  # type: ignore
         "EmpresaDB",
         back_populates="usuarios",
         foreign_keys=[empresa_id],

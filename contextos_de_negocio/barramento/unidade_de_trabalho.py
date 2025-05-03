@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import libs.ddd.adaptadores.orm.declarativo  # isso garante que todos os módulos sejam carregados
 from typing import Generic, TypeVar, Callable
 
 from sqlalchemy.orm import DeclarativeBase

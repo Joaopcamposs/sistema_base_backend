@@ -54,10 +54,11 @@ class Usuario(Agregado, SegurancaDoUsuario):
             ativo=ativo,
             permissoes=permissoes,
             id=uuid4(),
-            _tipo_de_operacao=TipoDeOperacao.INSERCAO,
         )
 
     def cadastrar(self, usuario: UsuarioEntidade) -> None:
+        self._tipo_de_operacao = TipoDeOperacao.INSERCAO
+
         self.criado_por = usuario.id
         self.criado_em = datetime.now()
 

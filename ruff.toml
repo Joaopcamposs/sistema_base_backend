@@ -7,3 +7,4 @@ line-length = 90
 "conftest.py" = ["F401"]  # Ignora F401 apenas no conftest.py
 "infra/aplicacoes/celery/tarefas.py" = ["F401"]  # Ignora F401 apenas no tasks.py
 'infra/aplicacoes/celery/worker.py' = ["F401"]  # Ignora E501 apenas no worker.py
+"contextos_de_negocio/barramento/unidade_de_trabalho.py" = ["F401"]  # Ignora imports

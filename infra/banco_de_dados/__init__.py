@@ -1,16 +1,14 @@
 import os
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Callable
+from typing import AsyncGenerator
 
 from sqlalchemy import text, NullPool
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     AsyncEngine,
     create_async_engine,
-    AsyncConnection,
 )
 
-from libs.ddd.adaptadores.orm.declarativo import Base
 from libs.ddd.dominio.agregado import SegurancaDoUsuario
 from libs.utils.constantes import (
     DB_HOST,
@@ -49,10 +47,6 @@ def obter_uri_do_celery() -> str:
 async def set_schema_name(session: AsyncSession, schema: str) -> None:
     await session.execute(text(f'SET search_path TO "{schema}"'))
     setattr(session, "schema", str(schema))
-
-
-def get_schema_name(session: AsyncSession) -> str:
-    return getattr(session, "schema", "public")
 
 
 def get_sql_engine(
@@ -154,52 +148,9 @@ async def listar_schemas_existentes() -> list[str]:
         return [row[0] for row in result if row[0] not in SCHEMAS_PARA_NAO_LISTAR]
 
 
-async def verificar_schema_existente(conn: AsyncConnection, schema_id: str) -> None:
-    result = await conn.execute(
-        text(
-            f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{schema_id}'"
-        )
-    )
-    if result.fetchone():
-        raise ValueError(f"Schema {schema_id} já existe")
-
-
 async def excluir_schema(schema_id: str) -> None:
     async with get_sql_engine().begin() as conn:
         await conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema_id}" CASCADE;'))
-
-
-async def criar_schema_e_tabelas(schema_id: str) -> None:
-    """
-    1. Cria o schema no Postgres
-    2. Ajusta os metadados para usar schema_id
-    3. Cria as tabelas do tenant dentro dele
-    4. Restaura schema=None nos metadados
-    """
-    # criar engine temporária
-    engine_temp: AsyncEngine = get_sql_engine(force_create_engine=True)
-
-    try:
-        # 1) criar schema
-        async with engine_temp.begin() as conn:
-            await verificar_schema_existente(conn, schema_id)
-            await conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema_id}"'))
-
-        # 2) atribuir schema nos objetos
-        for table in Base.metadata.sorted_tables:
-            if table.schema != "public":
-                table.schema = schema_id
-
-        # 3) criar tabelas no novo schema
-        async with engine_temp.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        # 4) restaurar esquema padrão (public)
-        for table in Base.metadata.sorted_tables:
-            if table.schema == schema_id:
-                table.schema = None
-    finally:
-        await engine_temp.dispose()
 
 
 async def validar_email_da_empresa(email: str) -> None:
@@ -215,18 +166,3 @@ async def validar_email_da_empresa(email: str) -> None:
         )
         if result.fetchone():
             raise ValueError(f"Email {email} já existe em outra empresa!")
-
-
-async def criar_schema_completo_dentro_de_uma_transacao(
-    schema_id: str | None, session_factory: Callable
-) -> AsyncSession:
-    await criar_schema_e_tabelas(schema_id)
-
-    if schema_id:
-        schema_id = str(schema_id)
-
-    session = await session_factory(
-        somente_leitura=False, schema=schema_id, force_create_engine=True
-    )
-
-    return session
