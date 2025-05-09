@@ -24,6 +24,11 @@ current_user: ContextVar[UsuarioEntidade] = ContextVar("current_user")
 async def authenticate_user(
     username: str, password: str
 ) -> UsuarioPublicoEntidade | None:
+    """
+    Etapas da funcao:
+    - busca o email do usuario, em hash, na tabela de usuarios publicos
+    - confere se a senha informada bate com a senha do usuario
+    """
     from contextos_de_negocio import UsuarioRepoConsulta
 
     async with get_session(somente_leitura=True, schema="public") as session:
@@ -51,6 +56,11 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
 ) -> UsuarioEntidade:
+    """
+    Decodifica o token JWT e busca o usuario (privado) no banco de dados, no schema da empresa.
+    :param token:
+    :return:
+    """
     from contextos_de_negocio import UsuarioRepoConsulta
 
     credentials_exception = HTTPException(

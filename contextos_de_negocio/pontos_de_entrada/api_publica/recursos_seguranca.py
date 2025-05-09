@@ -27,7 +27,7 @@ async def login_for_access_token(
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={
-            "email": user.descriptografar_email(user.email_criptografado),
+            "email": form_data.username,
             "empresa_id": str(user.empresa),
         },
         expires_delta=access_token_expires,
