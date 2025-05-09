@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from sqlalchemy import UUID, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from libs.ddd.adaptadores.orm.declarativo import Base, CamposBaseDB
+
+if TYPE_CHECKING:
+    from contextos_de_negocio.adaptadores.orm.declarativo import UsuarioDB
 
 
 class EmpresaDB(Base, CamposBaseDB):
@@ -29,7 +33,7 @@ class EmpresaDB(Base, CamposBaseDB):
     ativo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     # relacoes
-    usuarios: Mapped[list["UsuarioDB"]] = relationship(  # type: ignore
+    usuarios: Mapped[list["UsuarioDB"]] = relationship(
         "UsuarioDB",
         back_populates="empresa",
         foreign_keys="[UsuarioDB.empresa_id]",

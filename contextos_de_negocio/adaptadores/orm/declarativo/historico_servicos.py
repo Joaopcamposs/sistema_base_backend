@@ -1,9 +1,16 @@
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from sqlalchemy import ForeignKey, UUID
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from libs.ddd.adaptadores.orm.declarativo import CamposBaseDB, Base
+
+if TYPE_CHECKING:
+    from contextos_de_negocio.adaptadores.orm.declarativo import (
+        ClienteDB,
+        RegistroServicoDB,
+    )
 
 
 class HistoricoServicosDB(Base, CamposBaseDB):

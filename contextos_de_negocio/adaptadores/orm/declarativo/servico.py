@@ -1,10 +1,14 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from sqlalchemy import String, Numeric, Text, UUID
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from libs.ddd.adaptadores.orm.declarativo import Base, CamposBaseDB
+
+if TYPE_CHECKING:
+    from contextos_de_negocio.adaptadores.orm.declarativo import RegistroServicoDB
 
 
 class ServicoDB(Base, CamposBaseDB):

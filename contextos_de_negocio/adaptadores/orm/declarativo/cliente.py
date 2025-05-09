@@ -5,6 +5,11 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from libs.ddd.adaptadores.orm.declarativo import CamposBaseDB, Base
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from contextos_de_negocio.adaptadores.orm.declarativo import HistoricoServicosDB
+
 
 class ClienteDB(Base, CamposBaseDB):
     __tablename__ = "cliente"
@@ -28,6 +33,6 @@ class ClienteDB(Base, CamposBaseDB):
     pais: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # cada cliente tem UMA ficha clínica
-    historico: Mapped["HistoricoServicosDB"] = relationship(  # type: ignore
+    historico: Mapped["HistoricoServicosDB"] = relationship(
         "HistoricoServicosDB", back_populates="cliente", uselist=False
     )
