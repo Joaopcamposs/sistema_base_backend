@@ -36,5 +36,17 @@ class ClienteNaoEncontrado(FeedbackUsuario):
 
 @dataclass
 class ClienteJaCadastrado(FeedbackUsuario):
-    detail: str = "Cliente de Usuario já existente"
+    detail: str = "CPF de Cliente já existente"
+    status_code: int = status.HTTP_409_CONFLICT
+
+
+@dataclass
+class ServicoNaoEncontrado(FeedbackUsuario):
+    detail: str = "Servico não encontrado"
+    status_code: int = status.HTTP_404_NOT_FOUND
+
+
+@dataclass
+class ServicoJaCadastrado(FeedbackUsuario):
+    detail: str = "Codigo de Servico já existente"
     status_code: int = status.HTTP_409_CONFLICT

@@ -20,6 +20,7 @@ class ServicoDB(Base, CamposBaseDB):
     __tablename__ = "servico"
 
     id: Mapped[UUID] = mapped_column(UUID, primary_key=True, unique=True, default=uuid4)
+    codigo: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     nome: Mapped[str] = mapped_column(String(100), nullable=False)
     descricao: Mapped[str] = mapped_column(Text, nullable=False)
     valor: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)

@@ -13,6 +13,11 @@ from contextos_de_negocio.dominio.comandos.empresa import (
     AtualizarEmpresa,
     RemoverEmpresa,
 )
+from contextos_de_negocio.dominio.comandos.servico import (
+    CadastrarServico,
+    AtualizarServico,
+    RemoverServico,
+)
 from contextos_de_negocio.dominio.comandos.teste import ComandoTeste
 from contextos_de_negocio.dominio.comandos.usuario import (
     CadastrarUsuario,
@@ -28,6 +33,11 @@ from contextos_de_negocio.dominio.eventos.empresa import (
     EmpresaCriada,
     EmpresaAtualizada,
     EmpresaRemovida,
+)
+from contextos_de_negocio.dominio.eventos.servico import (
+    ServicoCriado,
+    ServicoAtualizado,
+    ServicoRemovido,
 )
 from contextos_de_negocio.dominio.eventos.teste import EventoTeste, EventoTesteAssincrono
 from contextos_de_negocio.dominio.eventos.usuario import (
@@ -46,6 +56,11 @@ from contextos_de_negocio.servicos.executores.empresa import (
     cadastrar_empresa,
     atualizar_empresa,
     remover_empresa,
+)
+from contextos_de_negocio.servicos.executores.servico import (
+    remover_servico,
+    atualizar_servico,
+    cadastrar_servico,
 )
 from contextos_de_negocio.servicos.executores.teste import (
     evento_teste_assincrono,
@@ -79,20 +94,31 @@ EVENT_HANDLERS: ManipuladoresDeEventos = ManipuladoresDeEventos(
         ClienteCriado: [],
         ClienteAtualizado: [],
         ClienteRemovido: [],
+        # servico
+        ServicoCriado: [],
+        ServicoAtualizado: [],
+        ServicoRemovido: [],
     }
 )
 
 COMMAND_HANDLERS: ManipuladoresDeComandos = ManipuladoresDeComandos(
     {
         ComandoTeste: comando_teste,
+        # usuario
         CadastrarUsuario: cadastrar_usuario,
         AtualizarUsuario: atualizar_usuario,
         RemoverUsuario: remover_usuario,
+        # empresa
         CadastrarEmpresa: cadastrar_empresa,
         AtualizarEmpresa: atualizar_empresa,
         RemoverEmpresa: remover_empresa,
+        # cliente
         CadastrarCliente: cadastrar_cliente,
         AtualizarCliente: atualizar_cliente,
         RemoverCliente: remover_cliente,
+        # servico
+        CadastrarServico: cadastrar_servico,
+        AtualizarServico: atualizar_servico,
+        RemoverServico: remover_servico,
     }
 )

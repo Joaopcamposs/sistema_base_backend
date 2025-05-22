@@ -1,38 +1,174 @@
-from datetime import datetime
+# from datetime import datetime
+#
+# from contextos_de_negocio.adaptadores.orm.declarativo import (
+#     ClienteDB,
+#     ServicoDB,
+#     HistoricoServicosDB,
+#     RegistroServicoDB,
+# )
+# from infra.banco_de_dados import get_session
+#
+# async with get_session(schema="", somente_leitura=False) as sessao:
+#     # cria cliente
+#     cliente = ClienteDB(nome="Maria", cpf="12345678900")
+#     sessao.add(cliente)
+#     sessao.commit()
+#
+#     # busca cliente e modelo
+#     cliente = sessao.query(ClienteDB).filter_by(nome="Maria").one()
+#     modelo = sessao.query(ServicoDB).filter_by(nome="Limpeza Dental").one()
+#
+#     # garante que o cliente tenha ficha
+#     if cliente.ficha_clinica is None:
+#         ficha = HistoricoServicosDB(cliente=cliente)
+#         sessao.add(ficha)
+#         sessao.commit()
+#     else:
+#         ficha = cliente.ficha_clinica
+#
+#     # cria registro com snapshot
+#     registro = RegistroServicoDB(
+#         ficha_clinica_id=ficha.id,
+#         modelo_id=modelo.id,
+#         nome_procedimento=modelo.nome,
+#         valor_procedimento=modelo.valor_base,
+#         data_realizacao=datetime.utcnow(),
+#     )
+#     sessao.add(registro)
+#     sessao.commit()
 
-from contextos_de_negocio.adaptadores.orm.declarativo import (
-    ClienteDB,
-    ServicoDB,
-    HistoricoServicosDB,
-    RegistroServicoDB,
+from abc import abstractmethod
+from sqlalchemy import select, insert, update, delete
+
+from contextos_de_negocio.adaptadores.orm.declarativo.servico import ServicoDB
+from contextos_de_negocio.dominio.agregados.servico import Servico
+from contextos_de_negocio.dominio.excecoes import (
+    ServicoNaoEncontrado,
+    ServicoJaCadastrado,
 )
-from infra.banco_de_dados import get_session
+from libs.ddd.adaptadores.repositorio.repositorio import RepositorioDominio
+from libs.ddd.adaptadores.visualizadores.visualizadores import Filtros
+from libs.utils.constantes import NAO_DELETADO
+from libs.utils.tipos_basicos import TipoDeOperacao
 
-async with get_session(schema="", somente_leitura=False) as sessao:
-    # cria cliente
-    cliente = ClienteDB(nome="Maria", cpf="12345678900")
-    sessao.add(cliente)
-    sessao.commit()
 
-    # busca cliente e modelo
-    cliente = sessao.query(ClienteDB).filter_by(nome="Maria").one()
-    modelo = sessao.query(ServicoDB).filter_by(nome="Limpeza Dental").one()
+class ServicoRepoDominioAbstrato(RepositorioDominio):
+    def __init__(self, *args, **kwargs):
+        super(ServicoRepoDominioAbstrato, self).__init__(*args, **kwargs)
+        self.seen: set[Servico] = set()
 
-    # garante que o cliente tenha ficha
-    if cliente.ficha_clinica is None:
-        ficha = HistoricoServicosDB(cliente=cliente)
-        sessao.add(ficha)
-        sessao.commit()
-    else:
-        ficha = cliente.ficha_clinica
+    async def adicionar(self, servico: Servico) -> None:
+        self.seen.add(servico)
+        await self._adicionar(servico)
 
-    # cria registro com snapshot
-    registro = RegistroServicoDB(
-        ficha_clinica_id=ficha.id,
-        modelo_id=modelo.id,
-        nome_procedimento=modelo.nome,
-        valor_procedimento=modelo.valor_base,
-        data_realizacao=datetime.utcnow(),
-    )
-    sessao.add(registro)
-    sessao.commit()
+    @abstractmethod
+    async def _adicionar(self, servico: Servico) -> None:
+        raise NotImplementedError
+
+    async def remover(self, servico: Servico) -> None:
+        await self._remover(servico)
+
+    @abstractmethod
+    async def _remover(self, servico: Servico) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def consultar_um_por_filtros(self, filtros: Filtros) -> Servico:
+        raise NotImplementedError()
+
+
+class ServicoRepoDominio(ServicoRepoDominioAbstrato):
+    async def gerar_agregado_para_cadastro(
+        self,
+        codigo: str,
+        nome: str,
+        descricao: str,
+        valor: float,
+    ) -> Servico:
+        async with self.session as session:
+            servico_com_mesmo_codigo = (
+                await session.execute(
+                    select(ServicoDB).where(
+                        ServicoDB.codigo == codigo, ServicoDB.deletado_em.is_(None)
+                    )
+                )
+            ).scalar_one_or_none()
+            if servico_com_mesmo_codigo:
+                raise ServicoJaCadastrado
+
+        return Servico.retornar_agregado_para_cadastro(
+            codigo=codigo,
+            nome=nome,
+            descricao=descricao,
+            valor=valor,
+        )
+
+    async def consultar_um_por_filtros(self, filtros: Filtros) -> Servico:
+        async with self.session as session:
+            servico = (
+                await session.execute(
+                    select(ServicoDB).filter_by(**filtros, **NAO_DELETADO)
+                )
+            ).scalar_one_or_none()
+            if not servico:
+                raise ServicoNaoEncontrado
+
+            agregado = Servico(
+                id=servico.id,
+                codigo=servico.codigo,
+                nome=servico.nome,
+                descricao=servico.descricao,
+                valor=servico.valor,
+                criado_por=servico.criado_por,
+                criado_em=servico.criado_em,
+                ultima_modificacao_em=servico.ultima_modificacao_em,
+                modificado_por=servico.modificado_por,
+                deletado_em=servico.deletado_em,
+                deletado_por=servico.deletado_por,
+            )
+
+        return agregado
+
+    async def _adicionar(self, servico: Servico) -> None:
+        dados = {
+            "id": servico.id,
+            "codigo": servico.codigo,
+            "nome": servico.nome,
+            "descricao": servico.descricao,
+            "valor": servico.valor,
+            "criado_por": servico.criado_por,
+            "criado_em": servico.criado_em,
+            "modificado_por": servico.modificado_por,
+            "ultima_modificacao_em": servico.ultima_modificacao_em,
+            "deletado_por": servico.deletado_por,
+            "deletado_em": servico.deletado_em,
+        }
+
+        match servico._tipo_de_operacao:
+            case TipoDeOperacao.INSERCAO:
+                operacao = insert(ServicoDB).values(dados)
+            case TipoDeOperacao.ATUALIZACAO:
+                operacao = (
+                    update(ServicoDB).where(ServicoDB.id == servico.id).values(dados)
+                )
+            case _:
+                raise ValueError(
+                    "Tipo de operação não suportado para o repositório de domínio."
+                )
+
+        await self.session.execute(operacao)
+
+    async def _remover(self, servico: Servico) -> None:
+        if servico._usa_soft_delete:
+            dados = {
+                "modificado_por": servico.modificado_por,
+                "ultima_modificacao_em": servico.ultima_modificacao_em,
+                "deletado_por": servico.deletado_por,
+                "deletado_em": servico.deletado_em,
+            }
+
+            operacao = update(ServicoDB).where(ServicoDB.id == servico.id).values(dados)
+        else:
+            operacao = delete(ServicoDB).where(ServicoDB.id == servico.id)
+
+        await self.session.execute(operacao)

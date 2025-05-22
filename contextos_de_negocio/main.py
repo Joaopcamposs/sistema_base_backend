@@ -12,6 +12,9 @@ from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_empresa import 
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_seguranca import (
     router_seguranca,
 )
+from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_servico import (
+    router_servico,
+)
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_teste import router_teste
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_usuario import (
     router_usuario,
@@ -50,3 +53,4 @@ app.include_router(router_teste)
 app.include_router(router_empresa)
 app.include_router(router_usuario)
 app.include_router(router_cliente)
+app.include_router(router_servico)
