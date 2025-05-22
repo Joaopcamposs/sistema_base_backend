@@ -6,7 +6,7 @@ authors = ["joaopcamposs <joaopcamposs@outlook.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.11"
+python = "==3.11.9"
 sqlalchemy = ">=2.0.40,<3.0.0"
 fastapi = {extras = ["all"], version = ">=0.115.12,<0.116.0"}
 uvicorn = {extras = ["standard"], version = "^0.34.2"}
@@ -26,7 +26,8 @@ pyjwt = "^2.10.1"
 cryptography = "^44.0.2"
 build = "^1.2.2.post1"
 twine = "^6.1.0"
-barramento-de-mensagens = "0.1.2"
+python-jose = {extras = ["cryptography"], version = "^3.4.0"}
+barramento-de-mensagens = "0.1.3"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
