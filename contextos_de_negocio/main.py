@@ -3,6 +3,9 @@ from typing import AsyncGenerator, Any
 
 from fastapi import FastAPI
 
+from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_cliente import (
+    router_cliente,
+)
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_empresa import (
     router_empresa,
 )
@@ -46,3 +49,4 @@ app.include_router(router_seguranca)
 app.include_router(router_teste)
 app.include_router(router_empresa)
 app.include_router(router_usuario)
+app.include_router(router_cliente)

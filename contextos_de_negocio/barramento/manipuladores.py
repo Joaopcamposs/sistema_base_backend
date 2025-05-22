@@ -3,6 +3,11 @@ from barramento_de_mensagens.manipuladores import (
     ManipuladoresDeComandos,
 )
 
+from contextos_de_negocio.dominio.comandos.cliente import (
+    CadastrarCliente,
+    AtualizarCliente,
+    RemoverCliente,
+)
 from contextos_de_negocio.dominio.comandos.empresa import (
     CadastrarEmpresa,
     AtualizarEmpresa,
@@ -13,6 +18,11 @@ from contextos_de_negocio.dominio.comandos.usuario import (
     CadastrarUsuario,
     AtualizarUsuario,
     RemoverUsuario,
+)
+from contextos_de_negocio.dominio.eventos.cliente import (
+    ClienteCriado,
+    ClienteAtualizado,
+    ClienteRemovido,
 )
 from contextos_de_negocio.dominio.eventos.empresa import (
     EmpresaCriada,
@@ -26,6 +36,11 @@ from contextos_de_negocio.dominio.eventos.usuario import (
     UsuarioRemovido,
     ChegouAHoraDeCriarUsuarioInicialDaEmpresa,
     ChegouAHoraDeCriarUsuarioADMDaEmpresa,
+)
+from contextos_de_negocio.servicos.executores.cliente import (
+    cadastrar_cliente,
+    atualizar_cliente,
+    remover_cliente,
 )
 from contextos_de_negocio.servicos.executores.empresa import (
     cadastrar_empresa,
@@ -50,14 +65,20 @@ EVENT_HANDLERS: ManipuladoresDeEventos = ManipuladoresDeEventos(
     {
         EventoTeste: [evento_teste],
         EventoTesteAssincrono: [evento_teste_assincrono],
+        # usuario
         UsuarioCriado: [cadastrar_usuario_publico],
         UsuarioAtualizado: [atualizar_usuario_publico],
         UsuarioRemovido: [remover_usuario_publico],
+        # empresa
         EmpresaCriada: [],
         EmpresaAtualizada: [],
         EmpresaRemovida: [],
         ChegouAHoraDeCriarUsuarioInicialDaEmpresa: [cadastrar_usuario],
         ChegouAHoraDeCriarUsuarioADMDaEmpresa: [cadastrar_usuario],
+        # cliente
+        ClienteCriado: [],
+        ClienteAtualizado: [],
+        ClienteRemovido: [],
     }
 )
 
@@ -70,5 +91,8 @@ COMMAND_HANDLERS: ManipuladoresDeComandos = ManipuladoresDeComandos(
         CadastrarEmpresa: cadastrar_empresa,
         AtualizarEmpresa: atualizar_empresa,
         RemoverEmpresa: remover_empresa,
+        CadastrarCliente: cadastrar_cliente,
+        AtualizarCliente: atualizar_cliente,
+        RemoverCliente: remover_cliente,
     }
 )

@@ -23,6 +23,8 @@ class ClienteDB(Base, CamposBaseDB):
     )
     telefone_2: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     email: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
+
+    # Campos de endereço
     cep: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     rua: Mapped[str] = mapped_column(String(255), nullable=False)
     numero: Mapped[str] = mapped_column(String(255), nullable=False)
