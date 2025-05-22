@@ -19,6 +19,12 @@ from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_teste import ro
 from contextos_de_negocio.pontos_de_entrada.api_publica.recursos_usuario import (
     router_usuario,
 )
+from contextos_de_negocio.pontos_de_entrada.api_publica.registro_de_servico import (
+    router_registro_de_servico,
+)
+from contextos_de_negocio.pontos_de_entrada.api_publica.sessao_de_servicos import (
+    router_sessao_de_servicos,
+)
 
 
 @asynccontextmanager
@@ -54,3 +60,5 @@ app.include_router(router_empresa)
 app.include_router(router_usuario)
 app.include_router(router_cliente)
 app.include_router(router_servico)
+app.include_router(router_sessao_de_servicos)
+app.include_router(router_registro_de_servico)

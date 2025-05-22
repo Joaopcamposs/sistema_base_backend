@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship, mapped_column, Mapped
 from libs.ddd.adaptadores.orm.declarativo import Base, CamposBaseDB
 
 if TYPE_CHECKING:
-    from contextos_de_negocio.adaptadores.orm.declarativo import RegistroServicoDB
+    from contextos_de_negocio.adaptadores.orm.declarativo import RegistroDeServicoDB
 
 
 class ServicoDB(Base, CamposBaseDB):
@@ -26,6 +26,6 @@ class ServicoDB(Base, CamposBaseDB):
     valor: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
 
     # relacoes
-    registros: Mapped[list["RegistroServicoDB"]] = relationship(
-        "RegistroServicoDB", back_populates="servico"
+    registros: Mapped[list["RegistroDeServicoDB"]] = relationship(
+        "RegistroDeServicoDB", back_populates="servico", foreign_keys="[RegistroDeServicoDB.id_servico]"
     )

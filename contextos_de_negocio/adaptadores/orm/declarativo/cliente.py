@@ -8,7 +8,7 @@ from libs.ddd.adaptadores.orm.declarativo import CamposBaseDB, Base
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from contextos_de_negocio.adaptadores.orm.declarativo import HistoricoServicosDB
+    from contextos_de_negocio.adaptadores.orm.declarativo import SessaoDeServicosDB
 
 
 class ClienteDB(Base, CamposBaseDB):
@@ -34,7 +34,6 @@ class ClienteDB(Base, CamposBaseDB):
     estado: Mapped[str] = mapped_column(String(255), nullable=False)
     pais: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    # cada cliente tem UMA ficha clínica
-    historico: Mapped["HistoricoServicosDB"] = relationship(
-        "HistoricoServicosDB", back_populates="cliente", uselist=False
+    sessoes: Mapped[list["SessaoDeServicosDB"]] = relationship(
+        "SessaoDeServicosDB", back_populates="cliente", foreign_keys="[SessaoDeServicosDB.id_cliente]",  # Especifica a FK correta
     )

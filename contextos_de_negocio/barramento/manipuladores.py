@@ -13,10 +13,20 @@ from contextos_de_negocio.dominio.comandos.empresa import (
     AtualizarEmpresa,
     RemoverEmpresa,
 )
+from contextos_de_negocio.dominio.comandos.registro_de_servico import (
+    CadastrarRegistroDeServico,
+    AtualizarRegistroDeServico,
+    RemoverRegistroDeServico,
+)
 from contextos_de_negocio.dominio.comandos.servico import (
     CadastrarServico,
     AtualizarServico,
     RemoverServico,
+)
+from contextos_de_negocio.dominio.comandos.sessao_de_servicos import (
+    CadastrarSessaoDeServicos,
+    AtualizarSessaoDeServicos,
+    RemoverSessaoDeServicos,
 )
 from contextos_de_negocio.dominio.comandos.teste import ComandoTeste
 from contextos_de_negocio.dominio.comandos.usuario import (
@@ -57,10 +67,20 @@ from contextos_de_negocio.servicos.executores.empresa import (
     atualizar_empresa,
     remover_empresa,
 )
+from contextos_de_negocio.servicos.executores.registro_de_servico import (
+    cadastrar_registro_de_servico,
+    atualizar_registro_de_servico,
+    remover_registro_de_servico,
+)
 from contextos_de_negocio.servicos.executores.servico import (
     remover_servico,
     atualizar_servico,
     cadastrar_servico,
+)
+from contextos_de_negocio.servicos.executores.sessao_de_servicos import (
+    cadastrar_sessao_de_servicos,
+    atualizar_sessao_de_servicos,
+    remover_sessao_de_servicos,
 )
 from contextos_de_negocio.servicos.executores.teste import (
     evento_teste_assincrono,
@@ -120,5 +140,13 @@ COMMAND_HANDLERS: ManipuladoresDeComandos = ManipuladoresDeComandos(
         CadastrarServico: cadastrar_servico,
         AtualizarServico: atualizar_servico,
         RemoverServico: remover_servico,
+        # registro de servico
+        CadastrarRegistroDeServico: cadastrar_registro_de_servico,
+        AtualizarRegistroDeServico: atualizar_registro_de_servico,
+        RemoverRegistroDeServico: remover_registro_de_servico,
+        # sessao de servicos
+        CadastrarSessaoDeServicos: cadastrar_sessao_de_servicos,
+        AtualizarSessaoDeServicos: atualizar_sessao_de_servicos,
+        RemoverSessaoDeServicos: remover_sessao_de_servicos,
     }
 )

@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, insert, update, delete, or_
 
 from contextos_de_negocio.adaptadores.orm.declarativo.cliente import ClienteDB
 from contextos_de_negocio.dominio.agregados.cliente import Cliente
@@ -50,15 +50,22 @@ class ClienteRepoDominio(ClienteRepoDominioAbstrato):
         endereco: Endereco,
     ) -> Cliente:
         async with self.session as session:
-            cliente_com_mesmo_email = (
+            cliente_no_banco = (
                 await session.execute(
                     select(ClienteDB).where(
-                        ClienteDB.email == Email(email), ClienteDB.deletado_em.is_(None)
+                        or_(
+                            ClienteDB.email == Email(email),
+                            ClienteDB.cpf == CPF(cpf)
+                        ),
+                        ClienteDB.deletado_em.is_(None)
                     )
                 )
             ).scalar_one_or_none()
-            if cliente_com_mesmo_email:
-                raise ClienteJaCadastrado
+            if cliente_no_banco:
+                if cliente_no_banco.email == Email(email):
+                    raise ClienteJaCadastrado("email")
+                if cliente_no_banco.cpf == CPF(cpf):
+                    raise ClienteJaCadastrado("cpf")
 
         return Cliente.retornar_agregado_para_cadastro(
             nome=nome,
@@ -114,7 +121,15 @@ class ClienteRepoDominio(ClienteRepoDominioAbstrato):
             "telefone": cliente.telefone,
             "telefone_2": cliente.telefone_2,
             "email": cliente.email,
-            "endereco": cliente.endereco,
+            # endereco
+            "cep": cliente.endereco.cep,
+            "rua": cliente.endereco.rua,
+            "numero": cliente.endereco.numero,
+            "complemento": cliente.endereco.complemento,
+            "bairro": cliente.endereco.bairro,
+            "cidade": cliente.endereco.cidade,
+            "estado": cliente.endereco.estado,
+            "pais": cliente.endereco.pais,
             "criado_por": cliente.criado_por,
             "criado_em": cliente.criado_em,
             "modificado_por": cliente.modificado_por,

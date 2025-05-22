@@ -3,7 +3,7 @@ from contextvars import ContextVar
 from datetime import timedelta, datetime
 from typing import Annotated
 
-import jwt
+from jose import JWTError, jwt
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi import Depends, HTTPException, Security
 from passlib.exc import InvalidTokenError
@@ -53,6 +53,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     return encoded_jwt
 
 
+def decode_access_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        return None
+
+
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
 ) -> UsuarioEntidade:
@@ -69,7 +77,7 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = decode_access_token(token)
         email = payload.get("email")
         empresa = payload.get("empresa_id")
         if email is None:
