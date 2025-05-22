@@ -1,5 +1,9 @@
 export COMPOSE_NAME=sistema_base_backend
 
+test-env:
+	docker-compose -f infra/docker-compose-tests.yml rm && docker-compose -f infra/docker-compose-tests.yml -p $(COMPOSE_NAME)_teste up
+
+
 docker-clean:
 	docker system prune -f
 

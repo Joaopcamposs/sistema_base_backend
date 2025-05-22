@@ -27,5 +27,7 @@ class ServicoDB(Base, CamposBaseDB):
 
     # relacoes
     registros: Mapped[list["RegistroDeServicoDB"]] = relationship(
-        "RegistroDeServicoDB", back_populates="servico", foreign_keys="[RegistroDeServicoDB.id_servico]"
+        "RegistroDeServicoDB",
+        back_populates="servico",
+        foreign_keys="[RegistroDeServicoDB.id_servico]",
     )

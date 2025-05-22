@@ -53,11 +53,8 @@ class ClienteRepoDominio(ClienteRepoDominioAbstrato):
             cliente_no_banco = (
                 await session.execute(
                     select(ClienteDB).where(
-                        or_(
-                            ClienteDB.email == Email(email),
-                            ClienteDB.cpf == CPF(cpf)
-                        ),
-                        ClienteDB.deletado_em.is_(None)
+                        or_(ClienteDB.email == Email(email), ClienteDB.cpf == CPF(cpf)),
+                        ClienteDB.deletado_em.is_(None),
                     )
                 )
             ).scalar_one_or_none()

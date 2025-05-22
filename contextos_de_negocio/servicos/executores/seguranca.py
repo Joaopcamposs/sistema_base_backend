@@ -5,7 +5,7 @@ from typing import Annotated
 
 from jose import JWTError, jwt
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from fastapi import Depends, HTTPException, Security
+from fastapi import Depends, HTTPException, Security, logger
 from passlib.exc import InvalidTokenError
 from pydantic import ValidationError
 from starlette import status
@@ -57,7 +57,8 @@ def decode_access_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
-    except JWTError:
+    except JWTError as erro:
+        logger.logger.error(f"Erro ao decodificar o token: {erro}")
         return None
 
 

@@ -1,4 +1,4 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from contextos_de_negocio.barramento import bootstrap
 from contextos_de_negocio.dominio.comandos.empresa import CadastrarEmpresa
@@ -39,7 +39,9 @@ async def criar_primeira_empresa_e_usuario() -> None:
         except ValueError:
             pass
 
-    id_empresa = uuid4()
+    id_empresa = UUID(
+        "7529b0ae-81ad-488b-b4ed-ecc094ca5084"
+    )  # id fixo para primeira empesa
     usuario_fake = gerar_usuario_fake_primeiro_cadastro(id_empresa)
     bus = bootstrap(usuario=usuario_fake, schema=str(id_empresa), criar_schema=True)
 

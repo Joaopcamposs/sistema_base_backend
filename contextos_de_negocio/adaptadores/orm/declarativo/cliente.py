@@ -35,5 +35,7 @@ class ClienteDB(Base, CamposBaseDB):
     pais: Mapped[str] = mapped_column(String(255), nullable=False)
 
     sessoes: Mapped[list["SessaoDeServicosDB"]] = relationship(
-        "SessaoDeServicosDB", back_populates="cliente", foreign_keys="[SessaoDeServicosDB.id_cliente]",  # Especifica a FK correta
+        "SessaoDeServicosDB",
+        back_populates="cliente",
+        foreign_keys="[SessaoDeServicosDB.id_cliente]",  # Especifica a FK correta
     )

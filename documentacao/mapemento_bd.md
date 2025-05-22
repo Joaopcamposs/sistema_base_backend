@@ -1,32 +1,32 @@
 ```text
                       +------------------+
-                      |     EMPRESA      |
-                      |------------------|
-                      | PK id            |
-                      +------------------+
-                               ▲
-            ┌──────────────────┼─────────────────────┐
+               n/1    |     EMPRESA      |    1/n
+            │─────────|------------------|───────────│
+            │         | PK id            |           │
+            │         +------------------+           │
+            │                  ▲                     │
+            │                  │  1/n                │
             │                  │                     │
      +-------------+    +---------------+    +---------------+
      |   USUARIO   |    |    CLIENTE    |    |   SERVICO     |
      |-------------|    |---------------|    |---------------|
      | PK id       |    | PK id         |    | PK id         |
-     | FK empresa  |    | FK empresa    |    | FK empresa    |
+     | FK empresa  |    | FK sessoes    |    | FK registros  |
      +-------------+    +---------------+    +---------------+
-                               │
+                               │ 1/n
                                ▼
                   +--------------------------+
-                  |   HISTORICO_SERVICOS     |
+                  |   SESSAO_DE_SERVICOS     |
                   |--------------------------|
                   | PK id                    |
-                  | FK cliente               |
+                  | FK registros             |
                   +--------------------------+
-                               │
+                               │ 1/n
                                ▼
                   +--------------------------+
                   |   REGISTRO_SERVICO       |  # guarda uma cópia congelada de servico
                   |--------------------------|
                   | PK id                    |
-                  | FK historico_servico     |
-                  | FK servico               |
+                  | FK id_sessao_de_servicos |
+                  | FK id_servico            |
                   +--------------------------+

@@ -50,5 +50,7 @@ class SessaoDeServicosDB(Base, CamposBaseDB):
         foreign_keys="[SessaoDeServicosDB.id_cliente]",  # Especifica a FK correta
     )
     registros: Mapped[list["RegistroDeServicoDB"]] = relationship(
-        "RegistroDeServicoDB", back_populates="sessao", foreign_keys="[RegistroDeServicoDB.id_sessao_de_servicos]"
+        "RegistroDeServicoDB",
+        back_populates="sessao",
+        foreign_keys="[RegistroDeServicoDB.id_sessao_de_servicos]",
     )

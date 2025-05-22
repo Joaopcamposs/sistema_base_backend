@@ -24,4 +24,4 @@ RUN poetry lock && poetry install --no-root
 ENV PATH="/sistema_base_backend/.venv/bin:$PATH"
 
 # Comando padrão
-CMD ["uvicorn", "contextos_de_negocio.main:app", "--host", "0.0.0.0", "--port", "8001", "--log-config", "uvicorn_logging_config.json"]
+CMD ["uvicorn", "contextos_de_negocio.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-config", "uvicorn_logging_config.json"]
