@@ -29,7 +29,3 @@ install:
 
 venv:
 	uv venv
-
-instalar-local:
-	uv remove barramento-de-mensagens && \
-	uv add libs/barramento_de_mensagens-0.1.4-py3-none-any.whl

@@ -3,7 +3,7 @@ from datetime import datetime
 from uuid import UUID
 from decimal import Decimal
 
-from barramento_de_mensagens.base.barramento import Comando
+from libs.barramento_de_mensagens.base.barramento import Comando
 
 
 @dataclass

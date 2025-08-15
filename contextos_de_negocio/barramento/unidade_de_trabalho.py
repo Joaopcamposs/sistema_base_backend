@@ -4,7 +4,7 @@ import libs.ddd.adaptadores.orm.declarativo  # isso garante que todos os módulo
 from typing import Generic, TypeVar, Callable
 
 from sqlalchemy.orm import DeclarativeBase
-from barramento_de_mensagens.unidade_de_trabalho import UnidadeDeTrabalhoBase
+from libs.barramento_de_mensagens.unidade_de_trabalho import UnidadeDeTrabalhoBase
 
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
 from infra.banco_de_dados import DEFAULT_SQL_SESSION_FACTORY, get_sql_engine

@@ -1,4 +1,4 @@
-from barramento_de_mensagens.dominio import DominioBase
+from libs.barramento_de_mensagens.dominio import DominioBase
 
 from contextos_de_negocio.adaptadores.repositorio.repo_consulta.cliente import (
     ClienteRepoConsulta,

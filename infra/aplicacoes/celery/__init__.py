@@ -1,5 +1,4 @@
 from celery import Celery
-from barramento_de_mensagens.aplicacoes.celery import configurar_celery_app
 
 from infra.banco_de_dados import obter_uri_do_celery
 
@@ -14,9 +13,6 @@ celery_app.conf.update(
     accept_content=["pickle"],
     result_serializer="pickle",
 )
-
-# Configura o celery app ANTES de importar qualquer tarefa
-configurar_celery_app(celery_app)
 
 # Agora sim você importa as tarefas
 import infra.aplicacoes.celery.tarefas  # noqa: E402

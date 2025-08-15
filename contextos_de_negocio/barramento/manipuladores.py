@@ -1,4 +1,4 @@
-from barramento_de_mensagens.manipuladores import (
+from libs.barramento_de_mensagens.manipuladores import (
     ManipuladoresDeEventos,
     ManipuladoresDeComandos,
 )

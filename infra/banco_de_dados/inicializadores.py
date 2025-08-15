@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from contextos_de_negocio.barramento import bootstrap
+from contextos_de_negocio.barramento.bootstrap import bootstrap
 from contextos_de_negocio.dominio.comandos.empresa import CadastrarEmpresa
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade
 from infra.banco_de_dados import (

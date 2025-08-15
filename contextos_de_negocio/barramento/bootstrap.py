@@ -1,12 +1,12 @@
 from typing import Callable
 
-from barramento_de_mensagens.base.barramento import BarramentoDeMensagens
-from barramento_de_mensagens.bootstrap import bootstrap_base
-from barramento_de_mensagens.manipuladores import (
+from libs.barramento_de_mensagens.base.barramento import BarramentoDeMensagens
+from libs.barramento_de_mensagens.bootstrap import bootstrap_base
+from libs.barramento_de_mensagens.manipuladores import (
     ManipuladoresDeEventos,
     ManipuladoresDeComandos,
 )
-from barramento_de_mensagens.unidade_de_trabalho import UnidadeDeTrabalhoBase
+from libs.barramento_de_mensagens.unidade_de_trabalho import UnidadeDeTrabalhoBase
 from sqlalchemy.orm import DeclarativeBase
 
 from contextos_de_negocio.dominio.entidades.usuario import UsuarioEntidade

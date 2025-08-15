@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from barramento_de_mensagens.base.barramento import Comando
+from libs.barramento_de_mensagens.base.barramento import Comando
 
 from libs.utils.tipos_basicos import CPF, Email, CNPJ
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from barramento_de_mensagens.base.barramento import Comando
+from libs.barramento_de_mensagens.base.barramento import Comando
 
 
 @dataclass

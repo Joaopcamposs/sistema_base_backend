@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from uuid import UUID
 
 from pydantic import UUID4
-from barramento_de_mensagens.base.barramento import Comando
+from libs.barramento_de_mensagens.base.barramento import Comando
 
 
 @dataclass

@@ -9,7 +9,7 @@ from libs.utils.tipos_basicos import Email, CPF
 
 @dataclass(kw_only=True)
 class UsuarioEntidade(CamposBase, SegurancaDoUsuario):
-    id: UUID
+    id: UUID | None
     empresa: UUID
     nome: str
     email: Email

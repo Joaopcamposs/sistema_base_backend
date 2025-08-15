@@ -53,7 +53,7 @@ class Agregado(CamposBase):
         return dados_convertidos
 
     def add_event(self, event: "Evento") -> None:  # noqa: F821
-        from barramento_de_mensagens.base.barramento import Evento
+        from libs.barramento_de_mensagens.base.barramento import Evento
 
         assert issubclass(type(event), Evento)
         self.eventos = getattr(self, "eventos", [])

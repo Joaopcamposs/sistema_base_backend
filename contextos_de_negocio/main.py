@@ -30,11 +30,8 @@ from contextos_de_negocio.pontos_de_entrada.api_publica.sessao_de_servicos impor
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     from infra.banco_de_dados.inicializadores import criar_primeira_empresa_e_usuario
-    from barramento_de_mensagens.aplicacoes.celery import configurar_celery_app
-    from infra.aplicacoes.celery import celery_app
 
     await criar_primeira_empresa_e_usuario()
-    configurar_celery_app(celery_app)
     yield
 
 
