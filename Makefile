@@ -3,7 +3,6 @@ export COMPOSE_NAME=sistema_base_backend
 test-env:
 	docker-compose -f infra/docker-compose-tests.yml rm && docker-compose -f infra/docker-compose-tests.yml -p $(COMPOSE_NAME)_teste up
 
-
 docker-clean:
 	docker system prune -f
 
@@ -25,12 +24,12 @@ ruff:
 mypy:
 	mypy .
 
-poetry-install:
-	poetry lock && poetry install
+install:
+	uv sync
 
-poetry-activate:
-	poetry env activate
+venv:
+	uv venv
 
 instalar-local:
-	poetry remove barramento-de-mensagens && \
-	poetry add libs/barramento_de_mensagens-0.1.3-py3-none-any.whl
+	uv remove barramento-de-mensagens && \
+	uv add libs/barramento_de_mensagens-0.1.4-py3-none-any.whl

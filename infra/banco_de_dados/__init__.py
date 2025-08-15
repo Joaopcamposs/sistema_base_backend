@@ -21,10 +21,14 @@ engine: AsyncEngine | None = None
 
 
 def obter_uri_do_banco_de_dados(eh_teste: bool = False) -> str:
-    ambiente_de_teste = eh_teste or os.getenv("TEST_ENV")
+    ambiente_de_teste = eh_teste or os.getenv("TEST_ENV", False)
     em_docker = os.getenv("IN_DOCKER", "false").lower() == "true"
 
+    print("ambiente_de_teste", ambiente_de_teste)
+    print("em_docker", em_docker)
+
     host = DB_HOST
+
     port = 5432 if any([ambiente_de_teste, em_docker]) else 54322
     password = DB_PASSWORD
     user = DB_USER

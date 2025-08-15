@@ -29,11 +29,23 @@ def bootstrap(
     criar_schema: bool = False,
 ) -> BarramentoDeMensagens:
     # importe seus manipuladores
-    from contextos_de_negocio.barramento import COMMAND_HANDLERS, EVENT_HANDLERS
+    from contextos_de_negocio.barramento.manipuladores import (
+        COMMAND_HANDLERS,
+        EVENT_HANDLERS,
+    )
+    from contextos_de_negocio.barramento.unidade_de_trabalho import UnidadeDeTrabalho
 
     # defina seus manipuladores
     command_handlers = command_handlers or COMMAND_HANDLERS
     event_handlers = event_handlers or EVENT_HANDLERS
+
+    if uow is None:
+        uow = UnidadeDeTrabalho(
+            usuario=usuario,
+            schema=schema,
+            somente_leitura=somente_leitura,
+            criar_schema=criar_schema,
+        )
 
     return bootstrap_base(
         uow=uow,
