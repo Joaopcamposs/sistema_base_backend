@@ -80,7 +80,7 @@ class ExecutorAssincronoAbstrato(ABC):
     """
     Classe base abstrata para executores assíncronos.
 
-    Fornece implementação do método `configurar_tarefa` que extrai
+    Fornece implementação da funcao `configurar_tarefa` que extrai
     configurações do evento (delay, fila, prioridade) para uso
     nas implementações concretas.
 
@@ -88,7 +88,7 @@ class ExecutorAssincronoAbstrato(ABC):
         Nenhum atributo de instância definido na classe base.
 
     Methods:
-        executar: Método abstrato a ser implementado.
+        executar: funcao abstrata a ser implementada.
         configurar_tarefa: Extrai configurações do evento.
     """
 
