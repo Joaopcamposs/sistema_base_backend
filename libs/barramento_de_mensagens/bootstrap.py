@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 
 from sqlalchemy.orm import DeclarativeBase
 
@@ -14,6 +14,11 @@ from libs.barramento_de_mensagens.manipuladores import (
 )
 from libs.barramento_de_mensagens.unidade_de_trabalho import UnidadeDeTrabalhoBase
 
+if TYPE_CHECKING:
+    from libs.barramento_de_mensagens.base.executor_assincrono import (
+        ExecutorAssincronoProtocol,
+    )
+
 
 def bootstrap_base(
     session_factory: Callable | None = None,
@@ -28,6 +33,7 @@ def bootstrap_base(
     permitir_execucoes_assincronas: bool = True,
     somente_leitura: bool = False,
     criar_schema: bool = False,
+    executor_assincrono: "ExecutorAssincronoProtocol | None" = None,
 ) -> BarramentoDeMensagens:
     if uow is None:
         uow = UnidadeDeTrabalhoBase(
@@ -46,4 +52,5 @@ def bootstrap_base(
         event_handlers=event_handlers,
         subir_erros_de_eventos=subir_erros_de_eventos,
         permitir_execucoes_assincronas=permitir_execucoes_assincronas,
+        executor_assincrono=executor_assincrono,
     )

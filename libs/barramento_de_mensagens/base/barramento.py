@@ -3,13 +3,18 @@ from __future__ import annotations
 import logging
 from abc import ABC
 from dataclasses import asdict, dataclass
-from typing import Callable, Any
+from typing import Callable, Any, TYPE_CHECKING
 
 import sentry_sdk
 
 from libs.barramento_de_mensagens.base.unidade_de_trabalho import (
     UnidadeDeTrabalhoAbstrata,
 )
+
+if TYPE_CHECKING:
+    from libs.barramento_de_mensagens.base.executor_assincrono import (
+        ExecutorAssincronoProtocol,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -66,12 +71,14 @@ class BarramentoDeMensagens:
         command_handlers: dict[type[Comando], Callable],
         subir_erros_de_eventos: bool = True,
         permitir_execucoes_assincronas: bool = False,
+        executor_assincrono: "ExecutorAssincronoProtocol | None" = None,
     ):
         self.uow = uow
         self.event_handlers = event_handlers
         self.command_handlers = command_handlers
         self.subir_erros_de_eventos = subir_erros_de_eventos
         self.permitir_execucoes_assincronas = permitir_execucoes_assincronas
+        self.executor_assincrono = executor_assincrono
         self.queue: list[Mensagem] = []
 
     async def handle(self, message: Mensagem) -> Any | None:
@@ -126,25 +133,20 @@ class BarramentoDeMensagens:
                 continue
 
     async def handle_async_event(self, event: Evento) -> None:
-        from infra.aplicacoes.celery.tarefas import (
-            task_tratar_evento_asyncrono,
-        )
+        if self.executor_assincrono is None:
+            logger.warning(
+                f"Evento {event} marcado para execução assíncrona, "
+                "mas nenhum executor assíncrono foi configurado. "
+                "O evento será executado de forma síncrona."
+            )
+            event.executar_de_forma_assincrona = False
+            await self.handle_event(event)
+            return
 
-        tarefa = task_tratar_evento_asyncrono.si(
+        self.executor_assincrono.executar(
             evento=event,
             usuario=self.uow.usuario,
         )
-
-        if event.tempo_de_atraso_para_execucao_assincrona:
-            tarefa = tarefa.set(countdown=event.tempo_de_atraso_para_execucao_assincrona)
-
-        if event.fila_de_execucao_assincrona:
-            tarefa = tarefa.set(queue=event.fila_de_execucao_assincrona)
-
-            if event.prioridade_de_execucao_assincrona:
-                tarefa = tarefa.set(priority=event.prioridade_de_execucao_assincrona)
-
-        tarefa.apply_async()
 
     async def handle_command(self, command: Comando) -> Any | None:
         logger.debug(f"handling command {command}")

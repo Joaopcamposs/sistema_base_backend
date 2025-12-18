@@ -1,6 +1,6 @@
 import functools
 import inspect
-from typing import Any, Callable
+from typing import Any, Callable, TYPE_CHECKING
 
 from libs.barramento_de_mensagens.base.barramento import (
     Comando,
@@ -16,6 +16,11 @@ from libs.barramento_de_mensagens.manipuladores import (
     ManipuladoresDeComandos,
 )
 
+if TYPE_CHECKING:
+    from libs.barramento_de_mensagens.base.executor_assincrono import (
+        ExecutorAssincronoProtocol,
+    )
+
 
 def bootstrap_abstrato(
     uow: UnidadeDeTrabalhoAbstrata,
@@ -23,6 +28,7 @@ def bootstrap_abstrato(
     event_handlers: ManipuladoresDeEventos,
     subir_erros_de_eventos: bool = False,
     permitir_execucoes_assincronas: bool = True,
+    executor_assincrono: "ExecutorAssincronoProtocol | None" = None,
 ) -> BarramentoDeMensagens:
     dependencies = {"uow": uow, "unidade_de_trabalho": uow}
 
@@ -43,6 +49,7 @@ def bootstrap_abstrato(
         command_handlers=injected_command_handlers,
         subir_erros_de_eventos=subir_erros_de_eventos,
         permitir_execucoes_assincronas=permitir_execucoes_assincronas,
+        executor_assincrono=executor_assincrono,
     )
 
 
