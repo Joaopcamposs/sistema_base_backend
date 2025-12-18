@@ -1,7 +1,32 @@
 """
 Módulo que define o protocolo para execução assíncrona de eventos.
-Este protocolo permite desacoplar o barramento de mensagens de implementações
-específicas como Celery, permitindo fácil substituição e testes.
+
+Este módulo implementa o padrão Strategy para execução assíncrona de eventos,
+permitindo desacoplar o barramento de mensagens de implementações específicas
+como Celery, RabbitMQ, ou qualquer outro sistema de filas.
+
+Exemplo de uso:
+    ```python
+    from libs.barramento_de_mensagens.base.executor_assincrono import (
+        ExecutorAssincronoNulo,
+        ExecutorAssincronoProtocol,
+    )
+
+    # Para testes - usa executor nulo que apenas registra eventos
+    executor = ExecutorAssincronoNulo()
+
+    # Para produção - use a implementação Celery
+    from infra.aplicacoes.celery.executor_celery import ExecutorCelery
+    executor = ExecutorCelery()
+
+    # Passar o executor ao bootstrap
+    bus = bootstrap(executor_assincrono=executor)
+    ```
+
+Classes:
+    ExecutorAssincronoProtocol: Protocolo (interface) para executores.
+    ExecutorAssincronoAbstrato: Classe base abstrata com métodos comuns.
+    ExecutorAssincronoNulo: Implementação para testes (não executa de fato).
 """
 
 from __future__ import annotations
@@ -18,7 +43,19 @@ if TYPE_CHECKING:
 class ExecutorAssincronoProtocol(Protocol):
     """
     Protocolo que define a interface para executores assíncronos.
-    Implementações concretas podem usar Celery, RabbitMQ, ou qualquer outro sistema.
+
+    Implementações concretas podem usar Celery, RabbitMQ, Redis Queue,
+    ou qualquer outro sistema de filas/mensageria.
+
+    Este protocolo usa `@runtime_checkable` para permitir verificação
+    de tipo em runtime com `isinstance()`.
+
+    Example:
+        ```python
+        def meu_executor(executor: ExecutorAssincronoProtocol):
+            if isinstance(executor, ExecutorAssincronoProtocol):
+                executor.executar(evento)
+        ```
     """
 
     def executar(
@@ -30,11 +67,11 @@ class ExecutorAssincronoProtocol(Protocol):
         Executa um evento de forma assíncrona.
 
         Args:
-            evento: O evento a ser executado
-            usuario: O usuário que disparou o evento (opcional)
+            evento: O evento a ser executado.
+            usuario: O usuário que disparou o evento (para contexto).
 
         Returns:
-            Qualquer resultado da execução (ex: task id do Celery)
+            Resultado da execução (ex: task_id do Celery, message_id do RabbitMQ).
         """
         ...
 
@@ -42,7 +79,17 @@ class ExecutorAssincronoProtocol(Protocol):
 class ExecutorAssincronoAbstrato(ABC):
     """
     Classe base abstrata para executores assíncronos.
-    Fornece uma implementação base que pode ser estendida.
+
+    Fornece implementação do método `configurar_tarefa` que extrai
+    configurações do evento (delay, fila, prioridade) para uso
+    nas implementações concretas.
+
+    Attributes:
+        Nenhum atributo de instância definido na classe base.
+
+    Methods:
+        executar: Método abstrato a ser implementado.
+        configurar_tarefa: Extrai configurações do evento.
     """
 
     @abstractmethod
@@ -55,26 +102,43 @@ class ExecutorAssincronoAbstrato(ABC):
         Executa um evento de forma assíncrona.
 
         Args:
-            evento: O evento a ser executado
-            usuario: O usuário que disparou o evento (opcional)
+            evento: O evento a ser executado.
+            usuario: O usuário que disparou o evento.
 
         Returns:
-            Qualquer resultado da execução
+            Resultado específico da implementação.
+
+        Raises:
+            NotImplementedError: Se não implementado pela subclasse.
         """
         raise NotImplementedError
 
-    def configurar_tarefa(
-        self,
-        evento: "Evento",
-    ) -> dict[str, Any]:
+    def configurar_tarefa(self, evento: "Evento") -> dict[str, Any]:
         """
-        Configura os parâmetros da tarefa assíncrona baseado no evento.
+        Extrai configurações de execução do evento.
+
+        Lê os atributos do evento relacionados à execução assíncrona
+        e retorna um dicionário com as configurações para a tarefa.
 
         Args:
-            evento: O evento com configurações de execução
+            evento: Evento com configurações de execução.
 
         Returns:
-            Dicionário com configurações da tarefa
+            Dicionário com chaves opcionais:
+                - countdown: Delay em segundos antes de executar.
+                - queue: Nome da fila de destino.
+                - priority: Prioridade na fila (se suportado).
+
+        Example:
+            ```python
+            evento = MeuEvento(
+                tempo_de_atraso_para_execucao_assincrona=30,
+                fila_de_execucao_assincrona="alta_prioridade",
+                prioridade_de_execucao_assincrona=10,
+            )
+            config = executor.configurar_tarefa(evento)
+            # config = {"countdown": 30, "queue": "alta_prioridade", "priority": 10}
+            ```
         """
         config: dict[str, Any] = {}
 
@@ -83,7 +147,6 @@ class ExecutorAssincronoAbstrato(ABC):
 
         if evento.fila_de_execucao_assincrona:
             config["queue"] = evento.fila_de_execucao_assincrona
-
             if evento.prioridade_de_execucao_assincrona:
                 config["priority"] = evento.prioridade_de_execucao_assincrona
 
@@ -92,11 +155,37 @@ class ExecutorAssincronoAbstrato(ABC):
 
 class ExecutorAssincronoNulo(ExecutorAssincronoAbstrato):
     """
-    Implementação nula do executor assíncrono.
-    Útil para testes ou quando não se deseja execução assíncrona real.
+    Implementação nula do executor assíncrono (Null Object Pattern).
+
+    Esta implementação NÃO executa eventos de fato, apenas os registra
+    em uma lista interna. É útil para:
+
+    - Testes unitários: verificar quais eventos foram disparados.
+    - Desenvolvimento local: evitar dependência de Celery/Redis.
+    - Debug: inspecionar eventos sem efeitos colaterais.
+
+    Attributes:
+        eventos_executados: Lista de tuplas (evento, usuario) registradas.
+
+    Example:
+        ```python
+        executor = ExecutorAssincronoNulo()
+
+        # Simula execução
+        executor.executar(MeuEvento(dados="teste"), usuario=meu_usuario)
+
+        # Verifica o que foi "executado"
+        assert len(executor.eventos_executados) == 1
+        evento, usuario = executor.eventos_executados[0]
+        assert evento.dados == "teste"
+
+        # Limpa para próximo teste
+        executor.limpar()
+        ```
     """
 
     def __init__(self) -> None:
+        """Inicializa o executor com lista vazia de eventos."""
         self.eventos_executados: list[tuple["Evento", "UsuarioBase | None"]] = []
 
     def executar(
@@ -106,7 +195,10 @@ class ExecutorAssincronoNulo(ExecutorAssincronoAbstrato):
     ) -> None:
         """
         Registra o evento sem executá-lo de fato.
-        Útil para testes e verificação.
+
+        Args:
+            evento: O evento a ser registrado.
+            usuario: O usuário associado ao evento.
         """
         self.eventos_executados.append((evento, usuario))
 
